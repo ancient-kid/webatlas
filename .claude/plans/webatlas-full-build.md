@@ -1364,3 +1364,14 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
   - Code: `src/main/ai/embeddingModel.ts` (lazy load with retry on failure, `embedTexts`, `cosine`). The spike runner is `embedSpike.ts` behind `WA_SPIKE_EMBED=1` (replaced in T17).
   - Test hooks: `WA_MODEL_CACHE` (shared cache) and `WA_SKIP_MODEL=1`.
   - Note for T17: batch padding shifts q8 vectors slightly (≈0.994), so embed cache misses one text per call.
+- 2026-10-01 — **T05 (command layer) implementation notes.** These refine Tasks 1.3–1.4 without changing any boundary.
+  - **22 commands**, not 20: `removeComment` (undoes `addComment`) and `addGroups` (undoes `removeGroup`) were added in T04.
+  - **Shared helpers:** `src/shared/export/geometry.ts` (`absolutePosition`, `toGroupSpace`, `nodeSize`, `GRID`, `CARD_WIDTH`, `CARD_HEIGHT`, `GROUP_PAD`) and `src/shared/tags.ts` (`normalizeTag`: trim, strip a leading `#`, collapse spaces, lowercase). Both live in `shared` because main (T17's tag ghosts) and the exporters need them too.
+  - **Exact undo for removals:** `removeTag`, `removeHighlight` and `removeComment` undo by restoring the previous array (`updateNode`/`updateGroup`), so tag and highlight order survive undo.
+  - **Payload values are deep-copied into the board** (`copy()` in `commands/def.ts`). Immer only tracks objects from the base state, so a card added and then tagged in the same batch would otherwise mutate the command payload and corrupt history. A regression test covers this.
+  - **No-op commands record no history.** Moving to the same spot or removing a highlight that doesn't exist leaves the board object unchanged, and `dispatch` returns false.
+  - `createGroup` cells use the widest and tallest member (default card widths from DESIGN.md: web/video/pdf 260, note 220; default height 240) plus 32 px. Members are packed in reading order.
+  - **Deleting a group removes the frame only**, and its cards stay where they are (as in Obsidian Canvas). The question card is never deleted or grouped.
+  - `updateNode` ignores `kind` and `parentGroupId`, since parent changes go through `setParent`.
+  - **Accepting a stale ghost** (one whose card is gone) drops it silently with no undo step.
+  - **`updateQuestion`** edits the question card only. Keeping the app store's `researchQuestion` in sync is wired in T08, when the app store exists.

@@ -54,8 +54,8 @@ Status legend: ⬜ not started · 🔄 in progress · 👀 awaiting your check �
 | T01 | Scaffold, dependencies, hardened window, **test harness** | 0.1–0.3 | — | ✅ |
 | T02 | Spike 1: webview capabilities ⏸ → proceed with `<webview>` | 0.4 | T01 | ✅ |
 | T03 | Spike 2: local embeddings in Electron ⏸ → keep in main | 0.5 | T01 | ✅ |
-| T04 | Shared types, schemas, URL/kind helpers | 1.1, 1.2 | T01 | 👀 |
-| T05 | Command layer, store, undo/redo | 1.3–1.5 | T04 | ⬜ |
+| T04 | Shared types, schemas, URL/kind helpers | 1.1, 1.2 | T01 | ✅ |
+| T05 | Command layer, store, undo/redo | 1.3–1.5 | T04 | 👀 |
 | T06 | Main storage, thumbnails, IPC bridge | 2.1–2.4 | T04 | ⬜ |
 | T07 | Design system port + dev gallery | 3.1–3.3 | T01 | ⬜ |
 | T08 | Home, new workspace, split screen, autosave/resume | 3.4–3.6 | T05, T06, T07 | ⬜ |
@@ -217,10 +217,10 @@ Claude records the outcome in AMENDMENTS.
 
 ## T05 — Command layer, store, undo/redo
 
-**Scope:** all 20 command types, the store, action creators. No UI yet.
+**Scope:** all 22 command types (the plan's 20 plus `removeComment` and `addGroups`, added in T04), the shared geometry helper, the store, action creators. No UI yet.
 
 **Automated tests** (`commands.test.ts`, `boardStore.test.ts`, `actions.test.ts`):
-- For **each** command type: apply → apply(inverse) equals the original board (20 tests).
+- For **each** command type: apply → apply(inverse) equals the original board (22 tests).
 - `removeNodes` removes connected edges and ghosts, and undo restores all of them.
 - `removeNodes` on the question card is a no-op.
 - `createGroup` packs members into a grid, and undo restores each member's exact old position and parent.
@@ -237,7 +237,7 @@ Claude records the outcome in AMENDMENTS.
 
 **Manual checklist** (no UI yet, so this is a review):
 1. Run `npm test -- store`. → Every test above passes and is listed by name. Claude includes the output in the report.
-2. Open `commands.test.ts` and look at the round-trip block. → There is one test per command type (20).
+2. Open `commands.test.ts` and look at the round-trip block. → There is one test per command type (22).
 3. Temporarily break one inverse by editing a line (Claude tells you which), run the tests, confirm a test fails, then undo your edit. → This shows the tests really check the behaviour.
 
 ---
