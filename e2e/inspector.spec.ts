@@ -56,8 +56,8 @@ const add = (page: Page): Promise<void> =>
 test('select a captured card → inspector shows URL and summary; editing note persists after relaunch', async () => {
   const { page } = launched
 
-  // When nothing is selected, inspector shows empty state
-  await expect(page.getByTestId('inspector-empty')).toHaveText('Select a card to see its details')
+  // When nothing is selected, inspector panel is hidden
+  await expect(page.getByTestId('inspector-panel')).toHaveCount(0)
 
   // Capture fixture page
   await go(launched, ARTICLE)
