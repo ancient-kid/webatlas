@@ -1,0 +1,16 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+
+# secrets: copy .env.example to .env and fill in your keys
+.env
+.env.*
+!.env.example
+
+# test output
+e2e/test-results
+e2e/artifacts
+playwright-report
