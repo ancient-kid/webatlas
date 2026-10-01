@@ -1419,3 +1419,20 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
     - **WorkspaceCard:** a real cover image, a menu slot, and "Opened …" from `lib/time.ts`.
   - **Theme:** `lib/theme.ts` follows the OS (`prefers-color-scheme`) live, with no in-app toggle. In the E2E tests Playwright's default light emulation is switched off, so Electron's `nativeTheme` drives it.
   - **Gallery:** `features/dev/Gallery.tsx`, reached with `?gallery` or View → Component gallery (Ctrl+Shift+G). The menu item exists only in dev and E2E runs. Removed in T19.
+- 2026-10-01 — **T08 (home, split screen, autosave) implementation notes.**
+  - **Split layout is hand-written** (`features/workspace/SplitLayout.tsx`), not `react-resizable-panels`, which was uninstalled. That library's v4 collapse model can't easily keep the `<webview>` mounted while it is hidden, or stop a drag from collapsing a pane.
+    - **Divider:** mouse drag (pointer capture, plus a shield so the web page can't swallow the pointer) and keyboard (arrows ±2%, Shift ±10%, Home and End). It is labelled as a separator with its current value.
+    - **Limits:** the width stays within `SPLIT_RATIO_MIN`–`MAX` (20–80%), and the open browser pane is never narrower than 320px.
+    - **Hidden browser:** the left side drops to zero width and becomes invisible, but its content stays mounted, so the same document and scroll position come back.
+  - **Top bar:** spans the whole window, so the browser toggle is reachable when the pane is hidden. It holds Home, the workspace name, Hide/Show browser, the view switcher, and undo/redo.
+    - Search, Organize and Export buttons are added in the tasks that make them work (T14, T18 and T16), instead of as dead placeholders now.
+  - **Ctrl+B:** a renderer key handler covers focus inside the app; the menu accelerator (`src/main/menu.ts`, which now builds the whole app menu) covers focus inside the web page. A menu event within 250 ms of a handled key press counts as the same press.
+  - **Autosave** (`store/persistence.ts`):
+    - Board, session or workspace changes are saved 500 ms after the last change.
+    - `flush()` saves now and waits for a save already in progress.
+    - Opening a workspace (`store/workspaceActions.ts`) pauses autosave around the swap, so opening never triggers a save.
+    - A failed save is retried by the next change or flush.
+    - The window-close handshake calls `autosave.flush()`.
+    - `researchQuestion` is taken from the question card's title at save time, which keeps it in sync with question edits (the T05 note).
+  - **Capture bar:** a CSS grid inside a size container on the browser pane. It uses two rows normally, one row when the pane is at least 860px wide, and a compact layout below 420px.
+  - **Placeholders until later tasks:** "Open sample workspace" reports that the sample isn't available yet (T16), the card menu's "Export JSON" says export arrives later (T16), and "Add to canvas" is disabled (T11). Import from the Home screen already works.

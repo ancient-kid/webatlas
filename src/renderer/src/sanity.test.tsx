@@ -2,11 +2,13 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import App from './App'
+import { installApiStub } from './test/apiStub'
 
 describe('component test harness', () => {
-  it('renders a React component into jsdom', () => {
+  it('renders the app into jsdom', async () => {
+    installApiStub()
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'WebAtlas' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'WebAtlas' })).toBeInTheDocument()
     expect(screen.getByTestId('app-root')).toBeVisible()
   })
 })

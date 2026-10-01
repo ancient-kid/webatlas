@@ -282,3 +282,145 @@ textarea.wa-input {
 .wa-input::placeholder {
   color: var(--ink-subtle);
 }
+
+/* Browser | canvas split (features/workspace/SplitLayout). */
+.wa-split {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.wa-split__left {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+.wa-split__right {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+.wa-split__divider {
+  flex: none;
+  width: 6px;
+  margin: 0 -1px;
+  z-index: 2;
+  cursor: col-resize;
+  background: var(--line);
+  border-left: 2px solid var(--canvas);
+  border-right: 2px solid var(--canvas);
+  touch-action: none;
+}
+.wa-split__divider:hover,
+.wa-split__divider[data-dragging] {
+  background: var(--line-strong);
+}
+.wa-split__shield {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  cursor: col-resize;
+}
+
+/* Workspace screen chrome. */
+.wa-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 48px;
+  flex: none;
+  padding: 0 var(--space-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.wa-topbar__name {
+  font: 600 15px/20px var(--font-sans);
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.wa-browser {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-2);
+}
+.wa-browser webview {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+.wa-ws__menu .wa-tb {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+.wa-ws__menu .wa-tb:hover {
+  background: var(--surface-sunken);
+}
+
+/* The capture bar adapts to the browser pane's own width: two tidy rows normally
+   (navigation + address, then capture mode + Add to canvas), one row when wide. */
+.wa-browser {
+  container-type: inline-size;
+}
+.wa-cap {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'nav url url'
+    'seg . add';
+}
+.wa-cap__nav {
+  grid-area: nav;
+}
+input.wa-cap__url {
+  grid-area: url;
+  width: 100%;
+  min-width: 0;
+}
+.wa-cap .wa-seg {
+  grid-area: seg;
+  justify-self: start;
+}
+.wa-cap > .wa-btn {
+  grid-area: add;
+  white-space: nowrap;
+}
+@container (min-width: 860px) {
+  .wa-cap {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'nav url seg add';
+  }
+}
+@container (max-width: 420px) {
+  .wa-cap {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'nav url'
+      'seg add';
+  }
+  .wa-cap > .wa-btn {
+    justify-self: end;
+    min-width: 0;
+  }
+  .wa-cap .wa-kbd {
+    display: none;
+  }
+}
+/* Percent limits alone get too narrow on a small window: keep the open browser usable. */
+.wa-split__left[aria-hidden='false'] {
+  min-width: 320px;
+}

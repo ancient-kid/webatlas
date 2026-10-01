@@ -26,6 +26,8 @@ import {
   StickyNote,
   Tag,
   Trash2,
+  Undo2,
+  Redo2,
   X,
   ZoomIn,
   type LucideIcon
@@ -61,7 +63,9 @@ export const ICONS = {
   more: MoreHorizontal,
   group: Group,
   'panel-close': PanelLeftClose,
-  'panel-open': PanelLeftOpen
+  'panel-open': PanelLeftOpen,
+  undo: Undo2,
+  redo: Redo2
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof ICONS

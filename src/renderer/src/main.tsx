@@ -15,10 +15,12 @@ import App from './App'
 import { installCloseHandshake } from './lib/closeHandshake'
 import { installDebugHooks } from './lib/debugHooks'
 import { followSystemTheme } from './lib/theme'
+import { autosave } from './store/persistence'
 
 followSystemTheme()
-// Nothing to flush yet; T08's autosave passes its flush() here.
-installCloseHandshake(async () => {})
+autosave.start()
+// Closing the window waits for pending autosaves.
+installCloseHandshake(() => autosave.flush())
 installDebugHooks()
 
 createRoot(document.getElementById('root')!).render(

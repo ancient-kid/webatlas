@@ -18,6 +18,8 @@ export interface CaptureBarProps {
   canGoForward?: boolean
   addDisabled?: boolean
   inputRef?: Ref<HTMLInputElement>
+  /** Shows a "Hide browser" button at the start of the bar. */
+  onCollapse?: () => void
 }
 
 function NavButton(p: {
@@ -55,6 +57,9 @@ export function CaptureBar({ inputRef, ...p }: CaptureBarProps): ReactElement {
   return (
     <div className="wa wa-cap">
       <div className="wa-cap__nav">
+        {p.onCollapse ? (
+          <NavButton icon="panel-close" label="Hide browser (Ctrl+B)" onClick={p.onCollapse} />
+        ) : null}
         <NavButton icon="back" label="Back" onClick={p.onBack} disabled={!p.canGoBack} />
         <NavButton
           icon="forward"
