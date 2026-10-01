@@ -43,7 +43,7 @@ const CATEGORIES: { value: GroupCategory; label: string }[] = [
   { value: 'custom', label: 'Custom' }
 ]
 
-export function Inspector(): ReactElement {
+export function Inspector(): ReactElement | null {
   const selectedIds = useAppStore((s) => s.session.selectedIds)
   const board = useBoardStore((s) => s.board)
 
@@ -51,9 +51,20 @@ export function Inspector(): ReactElement {
   const groupIds = selectedIds.filter((id) => board.groups[id])
   const totalCount = nodeIds.length + groupIds.length
 
+  if (!totalCount) return null
+
   const singleNode = nodeIds.length === 1 && groupIds.length === 0 ? board.nodes[nodeIds[0]] : null
   const singleGroup =
     groupIds.length === 1 && nodeIds.length === 0 ? board.groups[groupIds[0]] : null
+
+  const onClose = (): void => {
+    useAppStore.getState().patchSession({ selectedIds: [] })
+    try {
+      canvas().select([])
+    } catch {
+      // canvas not mounted or in tests
+    }
+  }
 
   return (
     <aside
@@ -65,17 +76,18 @@ export function Inspector(): ReactElement {
         <div className="flex items-center gap-2">
           <span className="wa-label font-medium text-ink">Details</span>
         </div>
+        <button
+          type="button"
+          className="wa-tb"
+          aria-label="Close details"
+          onClick={onClose}
+        >
+          <Icon name="x" size={16} />
+        </button>
       </div>
 
       <div className="wa-inspector__content flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-        {!totalCount ? (
-          <div
-            className="wa-inspector__empty flex flex-1 items-center justify-center p-6 text-center text-ink-muted wa-caption"
-            data-testid="inspector-empty"
-          >
-            Select a card to see its details
-          </div>
-        ) : singleNode ? (
+        {singleNode ? (
           <NodeDetails key={singleNode.id} node={singleNode} />
         ) : singleGroup ? (
           <GroupDetails key={singleGroup.id} group={singleGroup} />

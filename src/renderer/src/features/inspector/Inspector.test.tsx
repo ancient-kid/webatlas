@@ -60,12 +60,20 @@ beforeEach(() => {
 })
 
 describe('Inspector', () => {
-  it('renders the empty-state text when nothing is selected', () => {
+  it('is hidden when nothing is selected', () => {
     select()
+    const { container } = render(<Inspector />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('can be closed via the close button', async () => {
+    select('web-1')
     render(<Inspector />)
-    expect(screen.getByTestId('inspector-empty')).toHaveTextContent(
-      'Select a card to see its details'
-    )
+    expect(screen.getByTestId('inspector-panel')).toBeInTheDocument()
+
+    const closeBtn = screen.getByLabelText('Close details')
+    await userEvent.click(closeBtn)
+    expect(useAppStore.getState().session.selectedIds).toEqual([])
   })
 
   it('title edit + blur dispatches one updateNode and one history entry', async () => {
