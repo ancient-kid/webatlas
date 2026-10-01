@@ -1,7 +1,6 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { cosine, embedTexts, EMBEDDING_DIMS } from './embeddingModel'
-import { SPIKE_SENTENCES } from './embedSpike'
+import { cosine, embedTexts, EMBEDDING_DIMS, SAMPLE_SENTENCES } from './embeddingModel'
 
 // Real-model tests share the app's model cache (downloaded once, ~23 MB).
 // Set WA_SKIP_MODEL=1 to skip them, e.g. offline before the first download.
@@ -38,7 +37,7 @@ describe('embedTexts (no model needed)', () => {
 
 describe.skipIf(skipModel)('embedTexts with the real MiniLM model', () => {
   it('returns one unit-length 384-dim vector per text, in order', async () => {
-    const vectors = await embedTexts(CACHE, [SPIKE_SENTENCES.seaWallA, SPIKE_SENTENCES.pasta])
+    const vectors = await embedTexts(CACHE, [SAMPLE_SENTENCES.seaWallA, SAMPLE_SENTENCES.pasta])
     expect(vectors).toHaveLength(2)
     for (const v of vectors) {
       expect(v).toHaveLength(EMBEDDING_DIMS)
@@ -46,16 +45,16 @@ describe.skipIf(skipModel)('embedTexts with the real MiniLM model', () => {
     }
     // Batching pads shorter texts; with the 8-bit model that shifts vectors very slightly
     // (measured ~0.994 vs embedding alone), so order is checked by similarity, not equality.
-    const [single] = await embedTexts(CACHE, [SPIKE_SENTENCES.pasta])
+    const [single] = await embedTexts(CACHE, [SAMPLE_SENTENCES.pasta])
     expect(cosine(single, vectors[1])).toBeGreaterThan(0.99)
     expect(cosine(single, vectors[0])).toBeLessThan(0.25)
   }, 180_000)
 
   it('scores related sentences clearly above unrelated ones', async () => {
     const [a, b, c] = await embedTexts(CACHE, [
-      SPIKE_SENTENCES.seaWallA,
-      SPIKE_SENTENCES.seaWallB,
-      SPIKE_SENTENCES.pasta
+      SAMPLE_SENTENCES.seaWallA,
+      SAMPLE_SENTENCES.seaWallB,
+      SAMPLE_SENTENCES.pasta
     ])
     const related = cosine(a, b)
     const unrelated = cosine(a, c)
@@ -65,8 +64,8 @@ describe.skipIf(skipModel)('embedTexts with the real MiniLM model', () => {
   }, 60_000)
 
   it('is deterministic for the same text', async () => {
-    const [first] = await embedTexts(CACHE, [SPIKE_SENTENCES.seaWallB])
-    const [second] = await embedTexts(CACHE, [SPIKE_SENTENCES.seaWallB])
+    const [first] = await embedTexts(CACHE, [SAMPLE_SENTENCES.seaWallB])
+    const [second] = await embedTexts(CACHE, [SAMPLE_SENTENCES.seaWallB])
     expect(second).toEqual(first)
   }, 60_000)
 })

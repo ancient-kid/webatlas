@@ -31,6 +31,8 @@ export interface NodeCardViewProps {
   /** All highlights; only the newest is shown (the rest live in the side panel). */
   highlights?: Pick<Highlight, 'quote' | 'createdAt'>[]
   tags?: TagLike[]
+  /** Pending AI tag suggestions, shown as dashed chips. */
+  suggestedTags?: string[]
   /** Title of the card this one was opened from. */
   openedFrom?: string
   pages?: number
@@ -138,12 +140,15 @@ export function NodeCardView(p: NodeCardViewProps): ReactElement {
         ) : null}
         {p.summary ? <p className="wa-card__summary">{p.summary}</p> : null}
         {quote ? <blockquote className="wa-quote">{quote.quote}</blockquote> : null}
-        {tags.length ? (
+        {tags.length || p.suggestedTags?.length ? (
           <div className="wa-tags">
             {tags.slice(0, MAX_CARD_TAGS).map((g) => (
               <TagChip key={tagLabel(g)} label={tagLabel(g)} color={tagColor(g)} />
             ))}
             {extra > 0 ? <TagChip label={`+${extra}`} /> : null}
+            {p.suggestedTags?.map((t) => (
+              <TagChip key={`suggested:${t}`} label={t} ghost />
+            ))}
           </div>
         ) : null}
         {p.openedFrom ? (

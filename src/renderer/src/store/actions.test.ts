@@ -80,6 +80,52 @@ describe('ghost actions', () => {
     expect(b().nodes.n1.parentGroupId).toBe('gAI')
   })
 
+  it('an accepted group is placed where it covers no other card', () => {
+    // A card sits right where n1/n2 would be packed (their top-left, one cell down).
+    s().patchSilently((d) => {
+      d.nodes.blocker = makeNode({ id: 'blocker', position: { x: 400, y: 260 } })
+    })
+    A.acceptGhost('gG')
+    const g = b().groups.gAI
+    const blocker = b().nodes.blocker
+    const overlaps =
+      blocker.position.x < g.position.x + g.size.w &&
+      blocker.position.x + 260 > g.position.x &&
+      blocker.position.y < g.position.y + g.size.h &&
+      blocker.position.y + 240 > g.position.y
+    expect(overlaps).toBe(false)
+    // Undo puts the cards back exactly.
+    s().undo()
+    expect(b().nodes.n1.position).toEqual({ x: 400, y: 0 })
+    expect(b().nodes.n1.parentGroupId).toBeUndefined()
+  })
+
+  it('a group suggestion never pulls a card out of a group the student made since', () => {
+    // n2 was put in the student's group g1 after Organize suggested grouping n1 + n2.
+    A.dropIntoGroup(['n2'], 'g1')
+    expect(A.ghostFits(b(), groupGhost)).toBe(false)
+    const steps = s().past.length
+    expect(A.acceptGhost('gG')).toBe(false)
+    expect(b().nodes.n2.parentGroupId).toBe('g1')
+    expect(b().groups.gAI).toBeUndefined()
+    expect(b().ghosts.gG).toBeUndefined()
+    expect(s().past).toHaveLength(steps)
+  })
+
+  it('a link suggestion is stale once the student linked the same cards', () => {
+    expect(A.ghostFits(b(), edgeGhost)).toBe(true)
+    A.connectNodes('question', 'n1', 'supports')
+    expect(A.ghostFits(b(), edgeGhost)).toBe(false)
+    expect(A.acceptGhost('gE')).toBe(false)
+    expect(Object.values(b().edges).filter((e) => e.origin === 'ai')).toHaveLength(0)
+  })
+
+  it('ghostTargets names what a suggestion changes', () => {
+    expect(A.ghostTargets(groupGhost)).toEqual(['gAI'])
+    expect(A.ghostTargets(edgeGhost)).toEqual(['n1', 'question'])
+    expect(A.ghostTargets(tagGhost)).toEqual(['n2'])
+  })
+
   it('rejectGhost removes it; undo brings it back', () => {
     expect(A.rejectGhost('gT')).toBe(true)
     expect(b().ghosts.gT).toBeUndefined()

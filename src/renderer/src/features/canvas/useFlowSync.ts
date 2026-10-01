@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { commitDrag, connectNodes, type DragResult } from '@renderer/store/actions'
 import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { ghostsToFlow, isGhostId } from '../ai/ghostsToFlow'
 import { focusSet } from '../views/focus'
 import { boardToEdges, boardToFlow, type FlowEdge, type FlowNode } from './boardToFlow'
 import { findDropGroup, type Rect } from './geometry'
@@ -93,7 +94,10 @@ export function useFlowSync(): FlowSync {
       .elementFromPoint(point.clientX, point.clientY)
       ?.closest<HTMLElement>('.react-flow__node')
     const target = hit?.dataset.id
-    if (target && target !== state.fromNode.id) connectNodes(state.fromNode.id, target)
+    // Suggested group frames are not cards.
+    if (target && target !== state.fromNode.id && !isGhostId(target)) {
+      connectNodes(state.fromNode.id, target)
+    }
   }, [])
 
   const onNodeDragStop: OnNodeDrag<FlowNode> = useCallback(
@@ -135,39 +139,42 @@ export function useFlowSync(): FlowSync {
   const viewMode = useAppStore((s) => s.session.viewMode)
   const selectedIds = useAppStore((s) => s.session.selectedIds)
 
-  const displayNodes = useMemo(() => {
-    if (viewMode !== 'focus') {
-      return nodes.map((n) =>
-        n.className?.includes('wa-dim')
-          ? { ...n, className: n.className.replace(/\bwa-dim\b/g, '').trim() }
-          : n
+  const hoveredGhostId = useAppStore((s) => s.hoveredGhostId)
+
+  // Pending suggestions, drawn around the cards' current (measured) sizes.
+  const ghosts = useMemo(() => {
+    const sizes = new Map(
+      nodes.flatMap((n) =>
+        n.measured?.width && n.measured.height
+          ? [[n.id, { w: n.measured.width, h: n.measured.height }] as const]
+          : []
       )
-    }
-    const set = focusSet(board, selectedIds)
-    return nodes.map((n) => {
-      const isDim = !set.has(n.id)
+    )
+    return ghostsToFlow(board, (id) => sizes.get(id), hoveredGhostId)
+  }, [board, nodes, hoveredGhostId])
+
+  const displayNodes = useMemo(() => {
+    const set = viewMode === 'focus' ? focusSet(board, selectedIds) : null
+    const real = nodes.map((n) => {
       const base = n.className?.replace(/\bwa-dim\b/g, '').trim() || ''
-      const className = isDim ? (base ? `${base} wa-dim` : 'wa-dim') : base
-      return n.className === className ? n : { ...n, className }
+      const dim = set !== null && !set.has(n.id)
+      const className = dim ? (base ? `${base} wa-dim` : 'wa-dim') : base || undefined
+      return (n.className || undefined) === className ? n : { ...n, className }
     })
-  }, [nodes, viewMode, selectedIds, board])
+    // Suggested group frames sit behind everything (they come first, zIndex -1).
+    return [...(ghosts.nodes as FlowNode[]), ...real]
+  }, [nodes, viewMode, selectedIds, board, ghosts])
 
   const displayEdges = useMemo(() => {
-    if (viewMode !== 'focus') {
-      return edges.map((e) =>
-        e.className?.includes('wa-dim')
-          ? { ...e, className: e.className.replace(/\bwa-dim\b/g, '').trim() }
-          : e
-      )
-    }
-    const set = focusSet(board, selectedIds)
-    return edges.map((e) => {
-      const isDim = !set.has(e.source) || !set.has(e.target)
+    const set = viewMode === 'focus' ? focusSet(board, selectedIds) : null
+    const real = edges.map((e) => {
       const base = e.className?.replace(/\bwa-dim\b/g, '').trim() || ''
-      const className = isDim ? (base ? `${base} wa-dim` : 'wa-dim') : base
-      return e.className === className ? e : { ...e, className }
+      const dim = set !== null && (!set.has(e.source) || !set.has(e.target))
+      const className = dim ? (base ? `${base} wa-dim` : 'wa-dim') : base || undefined
+      return (e.className || undefined) === className ? e : { ...e, className }
     })
-  }, [edges, viewMode, selectedIds, board])
+    return [...real, ...(ghosts.edges as FlowEdge[])]
+  }, [edges, viewMode, selectedIds, board, ghosts])
 
   const selectAll = useCallback(() => {
     setNodes((ns) => withSelection(ns, () => true))

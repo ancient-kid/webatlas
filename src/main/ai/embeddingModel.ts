@@ -7,6 +7,15 @@ import type { FeatureExtractionPipeline } from '@huggingface/transformers'
 export const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2'
 export const EMBEDDING_DIMS = 384
 
+/** Two related sentences and an unrelated one (model sanity checks in tests). */
+export const SAMPLE_SENTENCES = {
+  seaWallA:
+    'Rotterdam builds sea walls and storm barriers to protect the city from coastal flooding.',
+  seaWallB:
+    'Coastal cities invest in flood defences such as dikes and sea walls against rising seas.',
+  pasta: 'Boil the pasta in salted water for nine minutes, then toss it with garlic and olive oil.'
+}
+
 let extractor: Promise<FeatureExtractionPipeline> | null = null
 let extractorCacheDir: string | null = null
 

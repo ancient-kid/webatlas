@@ -31,7 +31,7 @@ export function runMenuAction(action: MenuAction): void {
       requestAnimationFrame(() => browser()?.focusAddress())
       break
     case 'palette':
-      toast('Search arrives in a later step.')
+      // Handled by the workspace screen.
       break
     case 'toggle-browser':
       // Handled by the workspace screen.

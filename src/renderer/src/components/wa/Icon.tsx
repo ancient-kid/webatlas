@@ -31,6 +31,7 @@ import {
   Redo2,
   X,
   ZoomIn,
+  LoaderCircle,
   type LucideIcon
 } from 'lucide-react'
 import type { CSSProperties, ReactElement } from 'react'
@@ -68,7 +69,8 @@ export const ICONS = {
   undo: Undo2,
   redo: Redo2,
   export: Download,
-  download: Download
+  download: Download,
+  spinner: LoaderCircle
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof ICONS
@@ -85,7 +87,7 @@ export function Icon({ name, size = 16, className, style }: IconProps): ReactEle
   const Glyph = ICONS[name]
   return (
     <Glyph
-      className={cn('wa-icon', className)}
+      className={cn('wa-icon', name === 'spinner' && 'wa-spin', className)}
       size={size}
       strokeWidth={1.75}
       fill={name === 'play' ? 'currentColor' : 'none'}

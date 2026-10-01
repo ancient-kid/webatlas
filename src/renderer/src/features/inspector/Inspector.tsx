@@ -27,6 +27,7 @@ import { useBoardStore } from '@renderer/store/boardStore'
 import { openInBrowser } from '../browser/openInBrowser'
 import { canvas } from '../canvas/canvasControl'
 import { useCanvasUi } from '../canvas/canvasUi'
+import { SidePanelTabs } from '../ai/SidePanelTabs'
 
 const KIND_META: Record<NodeKind, { label: string; icon: IconName }> = {
   webpage: { label: 'Web page', icon: 'globe' },
@@ -74,14 +75,9 @@ export function Inspector(): ReactElement | null {
     >
       <div className="wa-inspector__header flex h-11 items-center justify-between border-b border-line px-4">
         <div className="flex items-center gap-2">
-          <span className="wa-label font-medium text-ink">Details</span>
+          <SidePanelTabs active="details" />
         </div>
-        <button
-          type="button"
-          className="wa-tb"
-          aria-label="Close details"
-          onClick={onClose}
-        >
+        <button type="button" className="wa-tb" aria-label="Close details" onClick={onClose}>
           <Icon name="x" size={16} />
         </button>
       </div>

@@ -6,6 +6,9 @@ import type { Session, Workspace } from '@shared/types'
 
 export type Screen = 'home' | 'workspace'
 
+/** Which side-panel tab shows: card details (when something is selected) or AI suggestions. */
+export type SideTab = 'details' | 'suggestions'
+
 /** The workspace record without its board and session. */
 export type WorkspaceMeta = Omit<Workspace, 'board' | 'session'>
 
@@ -13,6 +16,14 @@ export interface AppState {
   screen: Screen
   workspace: WorkspaceMeta | null
   session: Session
+  sideTab: SideTab
+  /** The suggestion the pointer is over in the panel (its ghost is emphasised on the canvas). */
+  hoveredGhostId: string | null
+  /** An Organize run is in progress. */
+  organizing: boolean
+  setSideTab(tab: SideTab): void
+  setHoveredGhost(id: string | null): void
+  setOrganizing(on: boolean): void
   showWorkspace(meta: WorkspaceMeta, session: Session): void
   showHome(): void
   /** Changes session fields; unchanged values are ignored (no autosave). */
@@ -30,13 +41,34 @@ export function createAppStore(): AppStore {
     screen: 'home',
     workspace: null,
     session: defaultSession(),
+    sideTab: 'details',
+    hoveredGhostId: null,
+    organizing: false,
+
+    setSideTab: (sideTab) => set({ sideTab }),
+    setHoveredGhost: (hoveredGhostId) => set({ hoveredGhostId }),
+    setOrganizing: (organizing) => set({ organizing }),
 
     showWorkspace(meta, session) {
-      set({ screen: 'workspace', workspace: meta, session })
+      set({
+        screen: 'workspace',
+        workspace: meta,
+        session,
+        sideTab: 'details',
+        hoveredGhostId: null,
+        organizing: false
+      })
     },
 
     showHome() {
-      set({ screen: 'home', workspace: null, session: defaultSession() })
+      set({
+        screen: 'home',
+        workspace: null,
+        session: defaultSession(),
+        sideTab: 'details',
+        hoveredGhostId: null,
+        organizing: false
+      })
     },
 
     patchSession(patch) {

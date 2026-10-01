@@ -8,6 +8,8 @@ import { tagColor, tagLabel, type TagLike } from './cat'
 export interface NoteCardViewProps {
   text: string
   tags?: TagLike[]
+  /** Pending AI tag suggestions, shown as dashed chips. */
+  suggestedTags?: string[]
   selected?: boolean
   color?: Cat
   width?: number
@@ -37,10 +39,13 @@ export function NoteCardView(p: NoteCardViewProps): ReactElement {
         ) : (
           <p className="wa-note-text wa-note__placeholder">Double-click to write</p>
         ))}
-      {p.tags?.length ? (
+      {p.tags?.length || p.suggestedTags?.length ? (
         <div className="wa-tags" style={{ marginTop: 8 }}>
-          {p.tags.map((g) => (
+          {p.tags?.map((g) => (
             <TagChip key={tagLabel(g)} label={tagLabel(g)} color={tagColor(g)} />
+          ))}
+          {p.suggestedTags?.map((t) => (
+            <TagChip key={`suggested:${t}`} label={t} ghost />
           ))}
         </div>
       ) : null}

@@ -1,7 +1,16 @@
 // Test-data builders shared by unit tests. Each returns a valid object; pass overrides
 // for the fields a test cares about. Not imported by app code.
 import { defaultSession } from '../session'
-import type { Board, CanvasNode, Edge, Ghost, Group, Workspace, WorkspaceFile } from '../types'
+import type {
+  Board,
+  BoardSnapshot,
+  CanvasNode,
+  Edge,
+  Ghost,
+  Group,
+  Workspace,
+  WorkspaceFile
+} from '../types'
 
 const T0 = 1_760_000_000_000
 
@@ -122,3 +131,46 @@ export function makeWorkspaceFile(overrides: Partial<WorkspaceFile> = {}): Works
 /** A valid 1×1 PNG as a data URL (thumbnail tests). */
 export const TINY_PNG_DATA_URL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+
+/** An Organize snapshot: the question, three cards (one in a group) and one link. */
+export function makeSnapshot(overrides: Partial<BoardSnapshot> = {}): BoardSnapshot {
+  const card = (
+    id: string,
+    title: string,
+    extra: Partial<BoardSnapshot['nodes'][number]> = {}
+  ): BoardSnapshot['nodes'][number] => ({
+    id,
+    kind: 'webpage' as const,
+    title,
+    url: `https://www.example.org/${id}`,
+    tags: [],
+    note: '',
+    highlights: [],
+    ...extra
+  })
+  return {
+    workspaceId: 'ws-1',
+    researchQuestion: 'How do coastal cities fund adaptation?',
+    questionNodeId: 'question-uuid',
+    nodes: [
+      {
+        ...card('question-uuid', 'How do coastal cities fund adaptation?'),
+        kind: 'question',
+        url: undefined
+      },
+      card('aaaa-1111', 'Rotterdam water squares', {
+        summary: 'Plazas that store rain.',
+        text: 'R'.repeat(5000),
+        tags: ['urban'],
+        note: 'Good example',
+        highlights: ['old quote', 'mid quote', 'newest quote'],
+        groupId: 'g1'
+      }),
+      card('bbbb-2222', 'Green bonds | explained', { text: 'Bonds fund\nprojects.' }),
+      card('cccc-3333', 'Jakarta sea wall')
+    ],
+    groups: [{ id: 'g1', label: 'Case studies', memberIds: ['aaaa-1111'] }],
+    edges: [{ source: 'aaaa-1111', target: 'bbbb-2222', relation: 'opened-from' }],
+    ...overrides
+  }
+}

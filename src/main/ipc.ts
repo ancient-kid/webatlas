@@ -3,7 +3,8 @@
 // renderer is untrusted. app.readyToClose is handled by the close handshake instead.
 import { ipcMain, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import { CHANNELS, type ApiMethod } from '@shared/api'
-import type { OrganizeResult } from '@shared/types'
+import { embedder } from './ai/embed'
+import { appOrganizer } from './ai/service'
 import { summarize } from './ai/summarize'
 import { aiStatus } from './env'
 import { importFromDialog, importSample, saveExport } from './exportImport'
@@ -48,13 +49,9 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
   handle('thumb.save', (ws, nodeId, dataUrl) => saveThumb(ws, nodeId, dataUrl))
 
   handle('ai.summarize', (text) => summarize(text))
-  // AI: stubs until T17 (embeddings, Organize).
-  handle('ai.embed', () => ({}))
-  handle('ai.organize', (): OrganizeResult => ({
-    ghosts: [],
-    mode: 'offline',
-    message: 'Organize is not built yet.'
-  }))
+  handle('ai.embed', (ws, items) => embedder().embed(ws as string, items as never))
+  // Expected failures (no key, offline) come back as a result with a message.
+  handle('ai.organize', (snapshot) => appOrganizer().organize(snapshot))
   handle('ai.status', () => aiStatus())
 
   handle('export.save', (format, content, name) => saveExport(getWindow(), format, content, name))

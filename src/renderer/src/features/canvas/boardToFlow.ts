@@ -5,9 +5,11 @@
 import type { Edge as RFEdge, Node as RFNode } from '@xyflow/react'
 import type { Board, CanvasNode, NodeKind } from '@shared/types'
 
-export type CanvasNodeType = 'question' | 'card' | 'note' | 'frame'
+/** `ghostGroup` is a suggested group, derived from the board's ghosts (ai/ghostsToFlow). */
+export type CanvasNodeType = 'question' | 'card' | 'note' | 'frame' | 'ghostGroup'
 export type FlowNode = RFNode<{ id: string }, CanvasNodeType>
-export type FlowEdge = RFEdge<{ id: string }, 'labeled'>
+/** `ghost` marks a suggested link; then `id` is the ghost's id. */
+export type FlowEdge = RFEdge<{ id: string; ghost?: true }, 'labeled'>
 
 export function nodeType(kind: NodeKind): CanvasNodeType {
   if (kind === 'question') return 'question'

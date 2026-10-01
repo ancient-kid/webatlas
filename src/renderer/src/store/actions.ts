@@ -2,6 +2,7 @@
 // They read the current state, generate ids and timestamps, and dispatch one command,
 // so each call is exactly one undo step. Components never build payloads themselves.
 import { absolutePosition, toGroupSpace } from '@shared/export/geometry'
+import { DEFAULT_GROUP_COLOR } from '@shared/groups'
 import { normalizeTag } from '@shared/tags'
 import {
   CATS,
@@ -27,13 +28,7 @@ import { layoutGroup } from './commands/groups'
 import { canApply } from './commands/registry'
 import { findFreeSpot } from '../features/canvas/placement'
 
-/** Group colour used when none is chosen. */
-export const DEFAULT_GROUP_COLOR: Record<GroupCategory, Cat> = {
-  topic: 'teal',
-  source: 'blue',
-  importance: 'rose',
-  custom: 'moss'
-}
+export { DEFAULT_GROUP_COLOR }
 
 const state = (): BoardState => useBoardStore.getState()
 const board = (): Board => state().board
@@ -351,13 +346,37 @@ function prepareGhostCommand(cmd: Command): Command {
       const color = (CATS as readonly string[]).includes(g.color)
         ? g.color
         : (DEFAULT_GROUP_COLOR[g.category] ?? 'teal')
-      return { type: 'createGroup', payload: { ...cmd.payload, group: { ...g, color } } }
+      const group: NewGroup = { ...g, color }
+      // Like the Group button: the new frame never covers other cards.
+      const position = g.position ? null : groupPlacement(group, cmd.payload.memberIds)
+      if (position) group.position = position
+      return { type: 'createGroup', payload: { ...cmd.payload, group } }
     }
     case 'batch':
       return { type: 'batch', payload: { commands: cmd.payload.commands.map(prepareGhostCommand) } }
     default:
       return cmd
   }
+}
+
+/**
+ * Whether a suggestion still fits the board as the student has changed it since Organize
+ * ran: its cards exist and it would change something, a suggested group would not pull
+ * cards out of a group the student made, and a suggested link is not already there.
+ */
+export function ghostFits(b: Board, ghost: Ghost): boolean {
+  const cmd = ghost.command
+  if (cmd.type === 'createGroup') {
+    if (cmd.payload.memberIds.some((id) => b.nodes[id]?.parentGroupId)) return false
+  } else if (cmd.type === 'connect') {
+    const { source, target } = cmd.payload.edge
+    const linked = Object.values(b.edges).some(
+      (e) =>
+        (e.source === source && e.target === target) || (e.source === target && e.target === source)
+    )
+    if (linked) return false
+  }
+  return canApply(b, cmd)
 }
 
 /**
@@ -369,13 +388,22 @@ export function acceptGhost(id: string): boolean {
   const ghost = board().ghosts[id]
   if (!ghost) return false
   const command = prepareGhostCommand(ghost.command)
-  if (!canApply(board(), command)) {
+  if (!ghostFits(board(), ghost) || !canApply(board(), command)) {
     state().patchSilently((d) => {
       delete d.ghosts[id]
     })
     return false
   }
   return dispatch(batchOf([command, { type: 'removeGhosts', payload: { ids: [id] } }]))
+}
+
+/** The item an accepted suggestion created or changed (a group, a link or the tagged cards). */
+export function ghostTargets(ghost: Ghost): string[] {
+  const cmd = ghost.command
+  if (cmd.type === 'createGroup') return [cmd.payload.group.id]
+  if (cmd.type === 'connect') return [cmd.payload.edge.source, cmd.payload.edge.target]
+  if (cmd.type === 'addTags') return cmd.payload.nodeIds
+  return []
 }
 
 export function rejectGhost(id: string): boolean {

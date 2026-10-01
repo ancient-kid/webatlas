@@ -1482,3 +1482,25 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
   - Qwen 3 reasons before answering by default, so summaries send `reasoning_effort: "none"` (documented at console.groq.com/docs/reasoning). `cleanSummary` also drops any `<think>…</think>` block.
   - **Checked live:** one sentence returned in 191 ms with no reasoning text.
   - **For T17 (Organize fallback on Groq):** decide per call whether reasoning helps; if it's left on, use `reasoning_format: "hidden"` or `"parsed"` and allow a bigger `max_tokens`.
+- 2026-10-01 — **T17 + T18 built as one batch, at the user's request** (with unit, component and E2E tests, live API checks and a break-it pass). These refine Tasks 8.1–8.4 and 8.6 without changing any boundary.
+  - **Agent loop (`src/main/ai/organize.ts`):** Haiku 4.5 (`claude-haiku-4-5`), strict tools, at most 3 turns, every `tool_result` in one user message with `is_error` for bad calls. Ghosts from earlier turns survive a later-turn failure. Router: Haiku → Groq (same prompt, OpenAI-shape tools, `reasoning_format: "hidden"` for Qwen) → offline. One 45 s deadline; each request gets the time left (at most 30 s). The renderer's snapshot is validated in main (`BoardSnapshotSchema`) and capped at 150 cards.
+  - **Short card aliases** (`q`, `n1…nN`) in the prompt and tools instead of UUIDs; `tools.ts` maps them back. Any alias the model writes in a rationale is replaced with the card's short title (the student never sees aliases). This replaces the T17 test "only real ids appear" with "only aliases the context can resolve appear".
+  - **Strict-mode limits:** `strict: true` doesn't accept `minItems > 1`, numeric ranges or string lengths, so "at least 2 cards", "confidence 0–1", "label 1–4 words" and "tag 1–3 words" are in the tool descriptions and enforced by zod after the call, with an `is_error` result the model can fix.
+  - **Tool rules beyond the plan:** a group may not include the question or a card already in a group, and a card may be in only one proposed group per run (the agent never moves the student's structure). Links may target the question but not start from it. Per-run caps: 6 groups, 10 links, 6 tags.
+  - **Offline names:** a cluster is named by its most common tag, then a word at least half its titles share (e.g. "Microplastics"), then its site, then "Suggested group N". Without a working embedding model, offline groups by site.
+  - **Mock mode** is a scripted Haiku stand-in (`src/main/ai/mockClient.ts`) driven by the run's own prompt, not JSON fixtures in `e2e/fixtures/ai/` (card ids change every run). It goes through the real loop, sends one deliberately bad id, and checks the `is_error` came back. Mock embeddings are hashed bag-of-words vectors. The embedding cache key includes the model id, so mock and real vectors never mix.
+  - **Embeddings (`src/main/ai/embed.ts`):** sha1 of model id plus text, one text per call, atomic write, pruned to the current cards, and skipped if the workspace was deleted. Warm-up runs at startup except in E2E. `embedSpike.ts` and `e2e/embed-spike.spec.ts` are replaced by `e2e/embed.spec.ts` (the real model through `ai.embed`).
+  - **Ghost UI:**
+    - Suggested group frames are derived each render (never stored) and drawn behind cards, largest first, with a see-through fill.
+    - Their "… (suggested)" label and Accept/Reject live in a React Flow **NodeToolbar**, so they stay above every card and readable at any zoom. This came from a screenshot where an overlapping frame hid a label.
+    - Suggested links are dashed, with a "relation?" label that shows ✓/✕ on hover. Suggested tags are dashed chips on the card.
+  - **Stale suggestions (`ghostFits`):** a suggestion is hidden, and dropped on accept, when its cards are gone, it would change nothing, a suggested group would pull a card out of a group the student made after Organize, or a suggested link's cards were linked since.
+  - **Accepting a group** uses the Group button's free-spot placement (the frame never covers other cards), then frames the new group.
+  - **Side panel:** a Details / Suggestions (N) tab strip in both panels (`appStore.sideTab`, `hoveredGhostId`, `organizing`). A top-bar Suggestions (N) toggle opens the tab with nothing selected. Below 1200 px window width the browser and Suggestions buttons show only their icon (and count).
+  - **`__waDebug`** now also exists in `npm run dev` (for `await __waDebug.organize()` in the T17 checklist), still never in a packaged run.
+  - **Live checks (2026-10-01, the user's keys):**
+    - Haiku: two unseen topics (microplastics, remote work), about 10 cards each, 11 suggestions per run in 15–17 s (one slow run took 44 s), 0–1 tool errors, each fixed by the model in a later turn.
+    - Groq fallback (Anthropic 401): 15 suggestions in 15.5 s.
+    - Offline: correct clusters in 0.3 s.
+    - Through the app UI: 6 suggestions in 10 s, and accept worked.
+  - **Spike 3 is still open:** the student's own acceptance percentages decide ship / tighten / groups only.

@@ -15,6 +15,8 @@ import {
   updateQuestion
 } from '@renderer/store/actions'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { useShallow } from 'zustand/react/shallow'
+import { suggestedTagsFor } from '../../ai/ghostsToFlow'
 import type { FlowNode } from '../boardToFlow'
 import { useCanvasUi } from '../canvasUi'
 import { CardHandles } from './CardHandles'
@@ -92,8 +94,13 @@ export const QuestionNode = memo(function QuestionNode({ id, selected }: Props) 
   )
 })
 
+/** Pending tag suggestions for one card (a stable array while they don't change). */
+const useSuggestedTags = (id: string): string[] =>
+  useBoardStore(useShallow((s) => suggestedTagsFor(s.board, id)))
+
 export const CardNode = memo(function CardNode({ id, selected, dragging }: Props) {
   const node = useBoardStore((s) => s.board.nodes[id])
+  const suggested = useSuggestedTags(id)
   const openedFrom = useBoardStore((s) => {
     const from = node?.capturedFromNodeId
     return from ? s.board.nodes[from]?.title : undefined
@@ -111,6 +118,7 @@ export const CardNode = memo(function CardNode({ id, selected, dragging }: Props
         summary={node.summary}
         highlights={node.highlights}
         tags={node.tags}
+        suggestedTags={suggested}
         openedFrom={openedFrom}
         hasNote={node.note.trim() !== ''}
         color={node.color}
@@ -126,6 +134,7 @@ export const CardNode = memo(function CardNode({ id, selected, dragging }: Props
 
 export const NoteNode = memo(function NoteNode({ id, selected, dragging }: Props) {
   const node = useBoardStore((s) => s.board.nodes[id])
+  const suggested = useSuggestedTags(id)
   const [editing, setEditing] = useEditing(id)
   if (!node) return null
   return (
@@ -134,6 +143,7 @@ export const NoteNode = memo(function NoteNode({ id, selected, dragging }: Props
       <NoteCardView
         text={node.title}
         tags={node.tags}
+        suggestedTags={suggested}
         color={node.color}
         selected={selected}
         width={node.size?.w}

@@ -12,8 +12,11 @@ import {
 } from '@xyflow/react'
 import { memo, type CSSProperties, type ReactElement } from 'react'
 import { CATS } from '@shared/types'
+import { Icon } from '@renderer/components/wa/Icon'
 import { cn } from '@renderer/lib/utils'
+import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { acceptSuggestion, rejectSuggestion } from '../../ai/suggestionActions'
 import { useCanvasUi } from '../canvasUi'
 import type { FlowEdge } from '../boardToFlow'
 import { linkEnds, type Rect, type Side } from '../geometry'
@@ -35,17 +38,17 @@ function rectOf(n: InternalNode): Rect {
   }
 }
 
-export const LabeledEdge = memo(function LabeledEdge({
-  id,
-  source,
-  target,
-  selected
-}: EdgeProps<FlowEdge>) {
-  const edge = useBoardStore((s) => s.board.edges[id])
+export const LabeledEdge = memo(function LabeledEdge(props: EdgeProps<FlowEdge>) {
+  return props.data?.ghost ? <GhostEdge {...props} /> : <RealEdge {...props} />
+})
+
+function useEnds(
+  source: string,
+  target: string
+): { path: string; labelX: number; labelY: number } | null {
   const from = useInternalNode(source)
   const to = useInternalNode(target)
-  if (!edge || !from || !to) return null
-
+  if (!from || !to) return null
   const ends = linkEnds(rectOf(from), rectOf(to))
   const [path, labelX, labelY] = getBezierPath({
     sourceX: ends.source.x,
@@ -55,6 +58,90 @@ export const LabeledEdge = memo(function LabeledEdge({
     targetY: ends.target.y,
     targetPosition: POSITION[ends.targetSide]
   })
+  return { path, labelX, labelY }
+}
+
+/**
+ * A suggested link: dashed, in ghost colours, its label ending in "?". Hovering the label
+ * shows ✓ and ✕ to accept or reject it.
+ */
+function GhostEdge({ id, source, target, data }: EdgeProps<FlowEdge>): ReactElement | null {
+  const ghostId = data?.id ?? ''
+  const edge = useBoardStore((s) => {
+    const g = s.board.ghosts[ghostId]
+    return g?.command.type === 'connect' ? g.command.payload.edge : undefined
+  })
+  const hot = useAppStore((s) => s.hoveredGhostId === ghostId)
+  const geo = useEnds(source, target)
+  if (!edge || !geo) return null
+  const colour = toneColor('ghost')
+  const label = relationLabel(edge)
+  const hover = (on: boolean): void => useAppStore.getState().setHoveredGhost(on ? ghostId : null)
+  return (
+    <>
+      <BaseEdge
+        id={id}
+        path={geo.path}
+        markerEnd="url(#wa-arrow-ghost)"
+        className={cn('wa-ghost-edge', hot && 'wa-ghost-hot')}
+        style={{ stroke: colour, strokeWidth: hot ? 3 : 2, strokeDasharray: '6 5' }}
+        interactionWidth={0}
+      />
+      <EdgeLabelRenderer>
+        <span
+          className={cn(
+            'wa-edge__label wa-edge__label--ghost wa-ghost-label nodrag nopan',
+            hot && 'wa-ghost-hot'
+          )}
+          data-ghost-id={ghostId}
+          onPointerEnter={() => hover(true)}
+          onPointerLeave={() => hover(false)}
+          style={
+            {
+              '--ec': colour,
+              transform: `translate(-50%, -50%) translate(${geo.labelX}px, ${geo.labelY}px)`,
+              pointerEvents: 'all'
+            } as CSSProperties
+          }
+        >
+          {label}?
+          <span className="wa-ghost-label__actions">
+            <button
+              type="button"
+              className="wa-ghost-label__btn wa-ghost-label__btn--accept"
+              aria-label={`Accept suggested link: ${label}`}
+              title="Accept"
+              onClick={(e) => {
+                e.stopPropagation()
+                acceptSuggestion(ghostId)
+              }}
+            >
+              <Icon name="check" size={12} />
+            </button>
+            <button
+              type="button"
+              className="wa-ghost-label__btn wa-ghost-label__btn--reject"
+              aria-label={`Reject suggested link: ${label}`}
+              title="Reject"
+              onClick={(e) => {
+                e.stopPropagation()
+                rejectSuggestion(ghostId)
+              }}
+            >
+              <Icon name="x" size={12} />
+            </button>
+          </span>
+        </span>
+      </EdgeLabelRenderer>
+    </>
+  )
+}
+
+function RealEdge({ id, source, target, selected }: EdgeProps<FlowEdge>): ReactElement | null {
+  const edge = useBoardStore((s) => s.board.edges[id])
+  const geo = useEnds(source, target)
+  if (!edge || !geo) return null
+  const { path, labelX, labelY } = geo
   const tone = edgeTone(edge)
   const colour = toneColor(tone)
   return (
@@ -87,7 +174,7 @@ export const LabeledEdge = memo(function LabeledEdge({
       </EdgeLabelRenderer>
     </>
   )
-})
+}
 
 /** Arrowhead markers for every link tone, coloured through CSS so they follow the theme. */
 export function ArrowMarkers(): ReactElement {

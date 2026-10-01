@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, Menu, protocol, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { setModelCacheDir, warmUpEmbeddings } from './ai/embed'
 import { installCloseHandshake } from './closeHandshake'
 import { loadEnv } from './env'
 import { buildAppMenu, buildPageContextMenu } from './menu'
@@ -134,19 +135,6 @@ function modelCacheDir(): string {
   return process.env.WA_MODEL_CACHE || join(app.getPath('userData'), 'models')
 }
 
-/** Spike 2 (T03): load MiniLM in main, embed three sentences and log the result. */
-async function runEmbeddingSpike(): Promise<void> {
-  const cacheDir = modelCacheDir()
-  console.info(`[embed-spike] loading ${cacheDir}`)
-  try {
-    const { runEmbedSpike } = await import('./ai/embedSpike')
-    console.info(`[embed-spike] ${JSON.stringify(await runEmbedSpike(cacheDir))}`)
-  } catch (err) {
-    const message = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
-    console.error(`[embed-spike] ${JSON.stringify({ ok: false, error: message })}`)
-  }
-}
-
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.webatlas.app')
 
@@ -163,6 +151,7 @@ app.whenReady().then(() => {
     })
 
   initPaths(join(app.getPath('userData'), 'workspaces'))
+  setModelCacheDir(modelCacheDir())
   protocol.handle(THUMB_SCHEME, (request) => serveThumb(request.url))
   registerIpc(() => mainWindow)
 
@@ -175,7 +164,8 @@ app.whenReady().then(() => {
     })
   )
 
-  if (process.env.WA_SPIKE_EMBED === '1') void runEmbeddingSpike()
+  // Load the embedding model in the background so the first Organize is quick.
+  if (!isE2E) warmUpEmbeddings()
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

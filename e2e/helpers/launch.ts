@@ -10,7 +10,7 @@ export interface LaunchedApp {
   userData: string
   /** Console errors and uncaught page errors collected from the app window. */
   errors: string[]
-  /** Lines the main process wrote to stdout/stderr (e.g. `[embed-spike] …`). */
+  /** Lines the main process wrote to stdout/stderr (e.g. `[organize] …`). */
   output: string[]
   close: () => Promise<void>
 }

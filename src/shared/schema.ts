@@ -14,6 +14,7 @@ import {
   RELATIONS,
   VIEW_MODES,
   type Board,
+  type BoardSnapshot,
   type Command,
   type Workspace,
   type WorkspaceFile
@@ -194,6 +195,31 @@ export const WorkspaceFileSchema = z.object({
   thumbs: z.record(id, z.string().startsWith('data:image/png;base64,')).optional()
 })
 
+/** What the renderer sends to Organize (checked in main: the renderer is untrusted). */
+export const BoardSnapshotSchema = z.object({
+  workspaceId: id,
+  researchQuestion: z.string().optional(),
+  questionNodeId: id,
+  nodes: z
+    .array(
+      z.object({
+        id,
+        kind: z.enum(NODE_KINDS),
+        title: z.string(),
+        url: z.string().optional(),
+        summary: z.string().optional(),
+        text: z.string().optional(),
+        tags: z.array(z.string()).max(100),
+        note: z.string(),
+        highlights: z.array(z.string()).max(500),
+        groupId: id.optional()
+      })
+    )
+    .max(1000),
+  groups: z.array(z.object({ id, label: z.string(), memberIds: z.array(id) })).max(500),
+  edges: z.array(z.object({ source: id, target: id, relation: z.enum(RELATIONS) })).max(5000)
+})
+
 export type ParseResult<T> = { ok: true; value: T } | { ok: false; error: string }
 
 /** Readable one-line summary of the first few validation problems. */
@@ -217,6 +243,14 @@ export function parseWorkspace(data: unknown): ParseResult<Workspace> {
   const r = WorkspaceSchema.safeParse(data)
   return r.success
     ? { ok: true, value: r.data as Workspace }
+    : { ok: false, error: describe(r.error) }
+}
+
+/** Validates an Organize snapshot. Never throws. */
+export function parseSnapshot(data: unknown): ParseResult<BoardSnapshot> {
+  const r = BoardSnapshotSchema.safeParse(data)
+  return r.success
+    ? { ok: true, value: r.data as BoardSnapshot }
     : { ok: false, error: describe(r.error) }
 }
 

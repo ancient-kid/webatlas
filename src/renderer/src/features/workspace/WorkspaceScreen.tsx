@@ -11,6 +11,8 @@ import { errorMessage } from '@renderer/lib/errors'
 import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
 import { closeWorkspace } from '@renderer/store/workspaceActions'
+import { OrganizeButton, SuggestionsToggle } from '../ai/OrganizeButton'
+import { SuggestionsPanel } from '../ai/SuggestionsPanel'
 import { BrowserPane } from '../browser/BrowserPane'
 import { useCaptureCommands } from '../capture/useCaptureCommands'
 import { CanvasView } from '../canvas/CanvasView'
@@ -30,6 +32,7 @@ export function WorkspaceScreen(): ReactElement {
   const patchSession = useAppStore((s) => s.patchSession)
   const canUndo = useBoardStore((s) => s.past.length > 0)
   const canRedo = useBoardStore((s) => s.future.length > 0)
+  const sideTab = useAppStore((s) => s.sideTab)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const lastToggle = useRef(0)
   useCaptureCommands()
@@ -99,7 +102,7 @@ export function WorkspaceScreen(): ReactElement {
             aria-label={toggleLabel}
             onClick={toggleBrowser}
           >
-            {toggleLabel}
+            <span className="wa-topbar__long">{toggleLabel}</span>
           </Button>
         </Tip>
         <Tip label="Search (Ctrl+K)" side="bottom">
@@ -112,6 +115,8 @@ export function WorkspaceScreen(): ReactElement {
             Search
           </Button>
         </Tip>
+        <OrganizeButton />
+        <SuggestionsToggle />
         <ViewSwitcher
           value={session.viewMode}
           onChange={(viewMode) => patchSession({ viewMode })}
@@ -151,7 +156,7 @@ export function WorkspaceScreen(): ReactElement {
               {session.viewMode === 'list' ? <ListView /> : <CanvasView />}
               <HintOverlay />
             </div>
-            <Inspector />
+            {sideTab === 'suggestions' ? <SuggestionsPanel /> : <Inspector />}
           </div>
         }
       />
