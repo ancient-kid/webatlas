@@ -59,6 +59,7 @@ export function SelectionControls(): ReactElement | null {
     } else {
       setPanel('note')
     }
+    useCanvasUi.getState().requestNoteFocus(single.id)
   }
 
   const onGroup = (): void => {

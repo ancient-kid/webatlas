@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { FIXTURE_ORIGIN } from '../playwright.config'
 import type { CanvasNode } from '../src/shared/types'
-import { createWorkspace, getBoard, pane } from './helpers/canvas'
+import { clickEmpty, createWorkspace, getBoard, pane } from './helpers/canvas'
 import { launchApp, type LaunchedApp } from './helpers/launch'
 
 const ARTICLE = `${FIXTURE_ORIGIN}/article.html`
@@ -92,7 +92,7 @@ test('Alt+H adds the selected text as a highlight (capturing the page first); Ct
   await expect(page.getByText('Highlight added')).toBeVisible()
   await expect(page.locator(`.react-flow__node[data-id="${card.id}"] .wa-quote`)).toBeVisible()
 
-  await pane(page).click({ position: { x: 300, y: 700 } })
+  await clickEmpty(page)
   await page.keyboard.press('Control+z')
   await expect.poll(async () => (await cards(page))[0].highlights.length).toBe(0)
 })

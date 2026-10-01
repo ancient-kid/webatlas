@@ -63,7 +63,7 @@ Status legend: ⬜ not started · 🔄 in progress · 👀 awaiting your check �
 | T10 | Selection toolbar + edge editor | 4.5 | T09 | 👀 |
 | T11 | Capture pipeline + summaries | 5.1–5.3, 5.7 | T09, T02 | 👀 |
 | T12 | Hotkeys, context menu, highlights, link drop | 5.4–5.6 | T11 | 👀 |
-| T13 | Inspector side panel | 6.1 | T09 | ⬜ |
+| T13 | Inspector side panel | 6.1 | T09 | 👀 |
 | T14 | Ctrl+K search | 6.2 | T09 | ⬜ |
 | T15 | Focus and list views | 6.3, 6.4 | T09 | ⬜ |
 | T16 | Export, import, sample placeholder, hints | 7.1–7.4 | T08, T09 | ⬜ |

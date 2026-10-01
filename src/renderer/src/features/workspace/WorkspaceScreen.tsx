@@ -14,6 +14,7 @@ import { closeWorkspace } from '@renderer/store/workspaceActions'
 import { BrowserPane } from '../browser/BrowserPane'
 import { useCaptureCommands } from '../capture/useCaptureCommands'
 import { CanvasView } from '../canvas/CanvasView'
+import { Inspector } from '../inspector/Inspector'
 import { SplitLayout } from './SplitLayout'
 
 /** A menu Ctrl+B arriving this soon after a handled key press is the same press. */
@@ -121,7 +122,14 @@ export function WorkspaceScreen(): ReactElement {
         ratio={session.splitRatio}
         onRatioChange={(splitRatio) => patchSession({ splitRatio })}
         left={<BrowserPane onCollapse={toggleBrowser} />}
-        right={<CanvasView />}
+        right={
+          <div className="flex h-full w-full overflow-hidden">
+            <div className="flex-1 h-full min-w-0">
+              <CanvasView />
+            </div>
+            <Inspector />
+          </div>
+        }
       />
     </div>
   )
