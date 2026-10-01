@@ -8,3 +8,6 @@ tsconfig.*.json
 # planning and design docs are hand-authored
 *.md
 e2e/test-results
+
+# test fixture pages must stay byte-for-byte as written
+e2e/fixtures/site

@@ -118,3 +118,7 @@ export function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
 export function makeWorkspaceFile(overrides: Partial<WorkspaceFile> = {}): WorkspaceFile {
   return { format: 'webatlas', version: 1, workspace: makeWorkspace(), ...overrides }
 }
+
+/** A valid 1×1 PNG as a data URL (thumbnail tests). */
+export const TINY_PNG_DATA_URL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='

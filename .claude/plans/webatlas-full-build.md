@@ -1375,3 +1375,21 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
   - `updateNode` ignores `kind` and `parentGroupId`, since parent changes go through `setParent`.
   - **Accepting a stale ghost** (one whose card is gone) drops it silently with no undo step.
   - **`updateQuestion`** edits the question card only. Keeping the app store's `researchQuestion` in sync is wired in T08, when the app store exists.
+- 2026-10-01 — **T06 (storage, thumbnails, IPC) implementation notes.**
+  - **Ids:** workspace ids must match `^[a-z0-9][a-z0-9-]{0,63}$`, all lowercase because they are the `wa-thumb://` host, which Chromium lowercases. Card ids must match `^[A-Za-z0-9_-]{1,128}$`. Every id is checked before it becomes part of a path. A URL like `wa-thumb://ws/../../x.png` is normalised by the URL parser and stays inside that workspace's thumbs folder.
+  - **Safety nets:**
+    - `.bak` is refreshed only from a current file that is still valid, so a damaged file never overwrites the backup.
+    - Loading a damaged `workspace.json` restores it from `.bak`.
+    - A lost or unreadable `index.json` is rebuilt from the workspace folders.
+    - `save` refuses a workspace that has been deleted, so a late autosave can't bring it back.
+    - Writes, index updates and per-workspace operations are queued with `serialize()`.
+  - **Close handshake:** main sends `app:before-close`, waits up to 1.5 s for the renderer's `readyToClose`, then waits for main's own queued writes, and only then destroys the window. The renderer side is `lib/closeHandshake.ts`; T08 passes its autosave `flush()` into it.
+  - **IPC:**
+    - Handlers accept calls only from the app window's webContents and re-throw errors with a clean message.
+    - The AI handlers are stubs until T11 and T17.
+    - `export.save` and `import.workspace` already work, with native dialogs, or `WA_E2E_SAVE_DIR` in tests, where import picks the newest `.json` there. T16 adds the exporters, thumbnail embedding and the UI.
+    - `import.sample` reports "not available yet" until T16.
+  - **`.env`** is read from the project folder, but not in E2E runs, which only use the environment they are given. `ai.status` returns booleans only.
+  - **Test hooks:** main passes `--wa-e2e` to the preload, which exposes `window.waE2E`, and the renderer then installs a frozen `window.__waDebug`. `getSession()` returns null until T08.
+  - **`src/preload/index.d.ts` was renamed to `window.d.ts`.** TypeScript ignores a `.d.ts` that sits next to a same-named `.ts`, so the E2E specs couldn't see the `window.api` types.
+  - **`.prettierignore`** now excludes `e2e/fixtures/site`, so the fixture pages stay byte-for-byte.

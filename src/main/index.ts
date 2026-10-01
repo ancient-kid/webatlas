@@ -1,15 +1,33 @@
-import { app, shell, BrowserWindow, session } from 'electron'
+import { app, shell, BrowserWindow, protocol, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { installCloseHandshake } from './closeHandshake'
+import { loadEnv } from './env'
+import { registerIpc } from './ipc'
+import { pendingWrites } from './storage/atomicWrite'
+import { initPaths } from './storage/paths'
+import { serveThumb, THUMB_SCHEME } from './thumbs'
 
 /** Session partition used by the embedded browser pane (its own cookie jar). */
 export const BROWSE_PARTITION = 'persist:webatlas-browse'
 
+const isE2E = process.env.WA_E2E === '1'
+
 // Test-only: isolate app data per E2E run. Must run before `app` is ready.
-if (process.env.WA_E2E === '1' && process.env.WA_USER_DATA) {
+if (isE2E && process.env.WA_USER_DATA) {
   app.setPath('userData', process.env.WA_USER_DATA)
 }
+
+loadEnv()
+
+// Thumbnails are served to the sandboxed renderer through wa-thumb:// (must be registered before ready).
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: THUMB_SCHEME,
+    privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true }
+  }
+])
 
 let mainWindow: BrowserWindow | null = null
 
@@ -35,13 +53,18 @@ function createWindow(): void {
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
-      webviewTag: true
+      webviewTag: true,
+      // Tells the preload to expose the read-only test hooks (window.waE2E).
+      additionalArguments: isE2E ? ['--wa-e2e'] : []
     }
   })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
   })
+
+  // Pending saves are flushed before the window really closes.
+  installCloseHandshake(mainWindow, pendingWrites)
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -118,6 +141,10 @@ app.whenReady().then(() => {
     .setPermissionRequestHandler((_wc, permission, callback) => {
       callback(permission === 'fullscreen' || permission === 'clipboard-sanitized-write')
     })
+
+  initPaths(join(app.getPath('userData'), 'workspaces'))
+  protocol.handle(THUMB_SCHEME, (request) => serveThumb(request.url))
+  registerIpc(() => mainWindow)
 
   createWindow()
 

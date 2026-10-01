@@ -55,8 +55,8 @@ Status legend: ⬜ not started · 🔄 in progress · 👀 awaiting your check �
 | T02 | Spike 1: webview capabilities ⏸ → proceed with `<webview>` | 0.4 | T01 | ✅ |
 | T03 | Spike 2: local embeddings in Electron ⏸ → keep in main | 0.5 | T01 | ✅ |
 | T04 | Shared types, schemas, URL/kind helpers | 1.1, 1.2 | T01 | ✅ |
-| T05 | Command layer, store, undo/redo | 1.3–1.5 | T04 | 👀 |
-| T06 | Main storage, thumbnails, IPC bridge | 2.1–2.4 | T04 | ⬜ |
+| T05 | Command layer, store, undo/redo | 1.3–1.5 | T04 | ✅ |
+| T06 | Main storage, thumbnails, IPC bridge | 2.1–2.4 | T04 | 👀 |
 | T07 | Design system port + dev gallery | 3.1–3.3 | T01 | ⬜ |
 | T08 | Home, new workspace, split screen, autosave/resume | 3.4–3.6 | T05, T06, T07 | ⬜ |
 | T09 | Canvas core | 4.1–4.4 | T08 | ⬜ |
