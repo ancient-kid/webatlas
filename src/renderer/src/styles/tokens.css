@@ -1,0 +1,97 @@
+/* WebAtlas design tokens, transcribed from DESIGN.md §2 (colour, spacing, radius, shadow).
+   tokens.test.ts checks every value against DESIGN.md. Light is the default theme;
+   lib/theme.ts sets data-theme on <html> from the operating system setting. */
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --font-display: 'Fraunces Variable', 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --canvas: #f3efe6;
+  --canvas-dot: #c7bfac;
+  --surface: #fffdf8;
+  --surface-sunken: #ebe6da;
+  --ink: #1d2320;
+  --ink-muted: #4f5a55;
+  --ink-subtle: #5d6863;
+  --line: #d8d1c2;
+  --line-strong: #858b82;
+  --brand: #0b5d66;
+  --on-brand: #ffffff;
+  --brand-soft: #d3e9ea;
+  --brand-ink: #0b5d66;
+  --focus: #1b55c7;
+  --highlight: #f8e38b;
+  --danger: #b3261e;
+  --on-danger: #ffffff;
+  --ghost-line: #5b7f83;
+  --ghost-fill: #d3e9ea;
+  --cat-rose: #b3314a;
+  --cat-rose-soft: #f6dbe0;
+  --cat-amber: #9c5200;
+  --cat-amber-soft: #f7e2c4;
+  --cat-moss: #4a7420;
+  --cat-moss-soft: #dfeccb;
+  --cat-teal: #0b7a84;
+  --cat-teal-soft: #cfeaec;
+  --cat-blue: #2c62b8;
+  --cat-blue-soft: #d9e5f7;
+  --cat-plum: #8a3a8f;
+  --cat-plum-soft: #eddaef;
+  --shadow-card: 0 1px 2px #1d232014, 0 2px 8px #1d23200f;
+  --shadow-lift: 0 6px 18px #1d232024, 0 2px 4px #1d232014;
+  --shadow-overlay: 0 18px 48px #1d232033, 0 4px 12px #1d232014;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #121715;
+  --canvas-dot: #34403a;
+  --surface: #1b2220;
+  --surface-sunken: #0e1211;
+  --ink: #eceee9;
+  --ink-muted: #a9b2ad;
+  --ink-subtle: #939d97;
+  --line: #2c3531;
+  --line-strong: #6d7871;
+  --brand: #62c6cf;
+  --on-brand: #06282c;
+  --brand-soft: #173a3e;
+  --brand-ink: #86d7de;
+  --focus: #8db4ff;
+  --highlight: #5c4e12;
+  --danger: #ff8f86;
+  --on-danger: #3a0906;
+  --ghost-line: #7fb0b5;
+  --ghost-fill: #173a3e;
+  --cat-rose: #f08aa0;
+  --cat-rose-soft: #46202a;
+  --cat-amber: #e9a54a;
+  --cat-amber-soft: #443014;
+  --cat-moss: #9bd06a;
+  --cat-moss-soft: #2a3a19;
+  --cat-teal: #5cc6cf;
+  --cat-teal-soft: #153a3e;
+  --cat-blue: #8fb5f2;
+  --cat-blue-soft: #1d2e4a;
+  --cat-plum: #d79ddb;
+  --cat-plum-soft: #3a2140;
+  --shadow-card: 0 1px 2px #00000066, 0 2px 8px #00000044;
+  --shadow-lift: 0 6px 18px #00000088, 0 2px 4px #00000066;
+  --shadow-overlay: 0 18px 48px #000000aa, 0 4px 12px #00000066;
+}

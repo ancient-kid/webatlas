@@ -11,3 +11,6 @@ e2e/test-results
 
 # test fixture pages must stay byte-for-byte as written
 e2e/fixtures/site
+
+# copied verbatim from DESIGN.md Appendix A (tokens.test.ts checks it)
+src/renderer/src/styles/wa.css

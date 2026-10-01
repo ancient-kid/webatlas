@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, session } from 'electron'
+import { app, shell, BrowserWindow, Menu, MenuItem, protocol, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -109,6 +109,33 @@ app.on('web-contents-created', (_event, contents) => {
   })
 })
 
+/** Development: switches the window between the app and the component gallery (?gallery). */
+function toggleGallery(): void {
+  const wc = mainWindow?.webContents
+  if (!wc) return
+  const url = new URL(wc.getURL())
+  if (url.searchParams.has('gallery')) url.searchParams.delete('gallery')
+  else url.searchParams.set('gallery', '')
+  void wc.loadURL(url.toString())
+}
+
+/** Development and tests: adds "Component gallery" (Ctrl+Shift+G) to the View menu. */
+function addDevMenu(): void {
+  const menu = Menu.getApplicationMenu()
+  const view = menu?.items.find((i) => i.role?.toLowerCase() === 'viewmenu' || i.label === 'View')
+  if (!menu || !view?.submenu) return
+  view.submenu.append(new MenuItem({ type: 'separator' }))
+  view.submenu.append(
+    new MenuItem({
+      id: 'dev-gallery',
+      label: 'Component gallery',
+      accelerator: 'CmdOrCtrl+Shift+G',
+      click: toggleGallery
+    })
+  )
+  Menu.setApplicationMenu(menu)
+}
+
 /** Where the embedding model is cached. Tests may share one cache via WA_MODEL_CACHE. */
 function modelCacheDir(): string {
   return process.env.WA_MODEL_CACHE || join(app.getPath('userData'), 'models')
@@ -147,6 +174,7 @@ app.whenReady().then(() => {
   registerIpc(() => mainWindow)
 
   createWindow()
+  if (is.dev || isE2E) addDevMenu()
 
   if (process.env.WA_SPIKE_EMBED === '1') void runEmbeddingSpike()
 

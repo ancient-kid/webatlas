@@ -1393,3 +1393,29 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
   - **Test hooks:** main passes `--wa-e2e` to the preload, which exposes `window.waE2E`, and the renderer then installs a frozen `window.__waDebug`. `getSession()` returns null until T08.
   - **`src/preload/index.d.ts` was renamed to `window.d.ts`.** TypeScript ignores a `.d.ts` that sits next to a same-named `.ts`, so the E2E specs couldn't see the `window.api` types.
   - **`.prettierignore`** now excludes `e2e/fixtures/site`, so the fixture pages stay byte-for-byte.
+- 2026-10-01 — **T07 (design system port) implementation notes.**
+  - **Styles:**
+    - `tokens.css` is generated from the DESIGN.md §2 tables (31 colours × 2 themes, 3 shadows × 2, 7 spacing, 4 radius, 3 font stacks).
+    - `wa.css` is Appendix A verbatim, without the Google Fonts `@import`, and is excluded from Prettier.
+    - App additions live in `wa-app.css`, using the same `wa-*` naming and tokens only.
+    - `tokens.test.ts` reads DESIGN.md live and checks both files.
+    - Tailwind sits in `@layer`, so the unlayered `wa-*` styles always win.
+  - **Fonts:** bundled through `@fontsource-variable/fraunces/opsz.css` (family "Fraunces Variable", optical size and weight axes) and IBM Plex Sans 400/500/600 and Mono 400.
+  - **shadcn primitives:** written by hand on Radix (`@radix-ui/react-tooltip`, `-popover`, `-dropdown-menu`, `-dialog`, newly added), not with the shadcn CLI.
+    - Each Tooltip carries its own Provider, so components work without app setup.
+    - The cmdk `Command` wrapper is deferred to T14, where it is first used.
+  - **Icons:** lucide-react, mapped onto the DESIGN.md names, plus six app icons: back, forward, reload, more, group and panel open/close.
+  - **Components** live in `components/wa/`: Icon, Button, TagChip, NodeCardView, NoteCardView, QuestionCardView, GroupFrameView, EdgeView, CanvasSurface, GhostSuggestion, SelectionToolbarView, CaptureBar, ViewSwitcher, WorkspaceCard and CommandPaletteView. Additions beyond Appendix B:
+    - **NodeCardView:**
+      - a `summary` line (for T11)
+      - a "Has a note" flag
+      - colour border
+      - a skeleton when the thumbnail is missing or broken
+      - a letter when the favicon is broken
+      - `showHandles` so React Flow can draw real handles
+    - **GhostSuggestion:** a `tag` kind and hover reporting. It renders nothing below 40% confidence.
+    - **SelectionToolbarView:** an optional Group button. Clicking the active colour clears it.
+    - **CaptureBar:** an editable address with Enter to go and Escape to cancel, plus back, forward and reload buttons.
+    - **WorkspaceCard:** a real cover image, a menu slot, and "Opened …" from `lib/time.ts`.
+  - **Theme:** `lib/theme.ts` follows the OS (`prefers-color-scheme`) live, with no in-app toggle. In the E2E tests Playwright's default light emulation is switched off, so Electron's `nativeTheme` drives it.
+  - **Gallery:** `features/dev/Gallery.tsx`, reached with `?gallery` or View → Component gallery (Ctrl+Shift+G). The menu item exists only in dev and E2E runs. Removed in T19.
