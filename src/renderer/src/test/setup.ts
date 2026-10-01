@@ -9,3 +9,20 @@ afterEach(async () => {
   const { cleanup } = await import('@testing-library/react')
   cleanup()
 })
+
+// jsdom lacks a few browser APIs React Flow needs (as recommended by the React Flow docs).
+if (typeof window !== 'undefined') {
+  class ResizeObserverStub {
+    observe = (): void => undefined
+    unobserve = (): void => undefined
+    disconnect = (): void => undefined
+  }
+  globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver
+  globalThis.DOMMatrixReadOnly ??= class {
+    m22: number
+    constructor(transform?: string) {
+      const scale = transform?.match(/scale\(([1-9.])\)/)?.[1]
+      this.m22 = scale !== undefined ? Number(scale) : 1
+    }
+  } as unknown as typeof DOMMatrixReadOnly
+}

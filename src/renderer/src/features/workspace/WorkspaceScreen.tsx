@@ -4,9 +4,7 @@
 import { useEffect, useRef, type ReactElement } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@renderer/components/wa/Button'
-import { CanvasSurface } from '@renderer/components/wa/CanvasSurface'
 import { Icon } from '@renderer/components/wa/Icon'
-import { QuestionCardView } from '@renderer/components/wa/QuestionCardView'
 import { ViewSwitcher } from '@renderer/components/wa/ViewSwitcher'
 import { Tip } from '@renderer/components/ui/tooltip'
 import { errorMessage } from '@renderer/lib/errors'
@@ -14,6 +12,7 @@ import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
 import { closeWorkspace } from '@renderer/store/workspaceActions'
 import { BrowserPane } from '../browser/BrowserPane'
+import { CanvasView } from '../canvas/CanvasView'
 import { SplitLayout } from './SplitLayout'
 
 /** A menu Ctrl+B arriving this soon after a handled key press is the same press. */
@@ -25,9 +24,6 @@ export function WorkspaceScreen(): ReactElement {
   const patchSession = useAppStore((s) => s.patchSession)
   const canUndo = useBoardStore((s) => s.past.length > 0)
   const canRedo = useBoardStore((s) => s.future.length > 0)
-  const question = useBoardStore(
-    (s) => Object.values(s.board.nodes).find((n) => n.kind === 'question')?.title ?? ''
-  )
   const lastToggle = useRef(0)
 
   const toggleBrowser = (): void => {
@@ -123,14 +119,7 @@ export function WorkspaceScreen(): ReactElement {
         ratio={session.splitRatio}
         onRatioChange={(splitRatio) => patchSession({ splitRatio })}
         left={<BrowserPane onCollapse={toggleBrowser} />}
-        right={
-          // Placeholder until the React Flow canvas arrives in T09.
-          <CanvasSurface height="100%">
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <QuestionCardView question={question} />
-            </div>
-          </CanvasSurface>
-        }
+        right={<CanvasView />}
       />
     </div>
   )

@@ -424,3 +424,157 @@ input.wa-cap__url {
 .wa-split__left[aria-hidden='false'] {
   min-width: 320px;
 }
+
+/* Canvas (React Flow) themed with the DESIGN.md tokens. */
+.wa-canvas-rf {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: var(--canvas);
+}
+.wa-canvas-rf .react-flow {
+  --xy-background-color: var(--canvas);
+  --xy-background-pattern-color: var(--canvas-dot);
+  --xy-node-background-color: transparent;
+  --xy-node-border: none;
+  --xy-node-boxshadow-selected: none;
+  --xy-node-boxshadow-hover: none;
+  --xy-handle-background-color: var(--surface);
+  --xy-handle-border-color: var(--line-strong);
+  --xy-connectionline-stroke: var(--brand);
+  --xy-connectionline-stroke-width: 2;
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--surface-sunken);
+  --xy-controls-button-color: var(--ink);
+  --xy-controls-button-color-hover: var(--ink);
+  --xy-controls-button-border-color: var(--line);
+  --xy-controls-box-shadow: var(--shadow-card);
+  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-mask-background-color: color-mix(in srgb, var(--ink) 10%, transparent);
+  --xy-minimap-node-background-color: var(--line-strong);
+  --xy-minimap-mask-stroke-color: var(--line-strong);
+  --xy-edge-label-background-color: var(--surface);
+  font-family: var(--font-sans);
+}
+.wa-canvas-rf .react-flow__controls,
+.wa-canvas-rf .react-flow__minimap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--brand {
+  fill: var(--brand);
+  --xy-minimap-node-background-color-props: var(--brand);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--rose {
+  fill: var(--cat-rose);
+  --xy-minimap-node-background-color-props: var(--cat-rose);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--amber {
+  fill: var(--cat-amber);
+  --xy-minimap-node-background-color-props: var(--cat-amber);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--moss {
+  fill: var(--cat-moss);
+  --xy-minimap-node-background-color-props: var(--cat-moss);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--teal {
+  fill: var(--cat-teal);
+  --xy-minimap-node-background-color-props: var(--cat-teal);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--blue {
+  fill: var(--cat-blue);
+  --xy-minimap-node-background-color-props: var(--cat-blue);
+}
+.wa-canvas-rf .react-flow__minimap-node.wa-mm--plum {
+  fill: var(--cat-plum);
+  --xy-minimap-node-background-color-props: var(--cat-plum);
+}
+.wa-rf-markers {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+/* Handles: DESIGN.md wa-handle, shown on hover or selection. */
+.wa-canvas-rf .react-flow__handle.wa-rf-handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--line-strong);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.wa-canvas-rf .react-flow__node:hover .wa-rf-handle,
+.wa-canvas-rf .react-flow__node.selected .wa-rf-handle,
+.wa-canvas-rf .react-flow__node .wa-rf-handle.connectingfrom,
+.wa-canvas-rf .react-flow__node .wa-rf-handle.connectingto {
+  opacity: 1;
+}
+.wa-canvas-rf .react-flow__node.selected .wa-rf-handle {
+  border-color: var(--brand);
+}
+.wa-canvas-rf .react-flow__resize-control.wa-rf-resize-handle {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+}
+/* Only the corners resize; the edge lines would sit over the connection handles. */
+.wa-canvas-rf .react-flow__resize-control.wa-rf-resize-line {
+  border-color: transparent;
+  pointer-events: none;
+}
+.wa-canvas-rf .react-flow__node-frame {
+  pointer-events: all;
+}
+/* A resized card or note fills its node box. */
+.wa-fill {
+  width: 100%;
+  height: 100%;
+}
+.wa-fill.wa-card,
+.wa-fill.wa-note {
+  overflow: hidden;
+}
+/* Group frames on the canvas fill their node and keep the label pill outside. */
+.wa-canvas-rf .wa-group {
+  height: 100%;
+  overflow: visible;
+}
+/* Links */
+.wa-edge__label--selected {
+  box-shadow: 0 0 0 2px var(--brand);
+}
+.wa-canvas-rf .react-flow__edge-path {
+  transition: stroke-width 150ms ease;
+}
+/* In-place editing of card text. */
+.wa-inline {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  resize: none;
+}
+.wa-inline--question {
+  background: color-mix(in srgb, var(--on-brand) 12%, transparent);
+  color: var(--on-brand);
+  border-color: var(--on-brand);
+}
+.wa-inline--label {
+  width: 16ch;
+  padding: 0 var(--space-1);
+  border: 0;
+  font: 600 11px/14px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

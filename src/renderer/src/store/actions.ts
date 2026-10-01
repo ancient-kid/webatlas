@@ -49,11 +49,12 @@ function changedKeys<P extends object>(current: object, patch: P): Partial<P> {
   ) as Partial<P>
 }
 
-function splitIds(ids: string[]): { nodeIds: string[]; groupIds: string[] } {
+function splitIds(ids: string[]): { nodeIds: string[]; groupIds: string[]; edgeIds: string[] } {
   const b = board()
   return {
     nodeIds: ids.filter((id) => b.nodes[id]),
-    groupIds: ids.filter((id) => b.groups[id])
+    groupIds: ids.filter((id) => b.groups[id]),
+    edgeIds: ids.filter((id) => b.edges[id])
   }
 }
 
@@ -92,12 +93,13 @@ export function updateQuestion(text: string): boolean {
 }
 
 /**
- * Deletes cards and groups. Deleting a group removes the frame only; its cards stay.
- * The research-question card is never deleted.
+ * Deletes cards, links and groups. Deleting a group removes the frame only; its cards
+ * stay. The research-question card is never deleted.
  */
 export function deleteSelection(ids: string[]): boolean {
-  const { nodeIds, groupIds } = splitIds(ids)
+  const { nodeIds, groupIds, edgeIds } = splitIds(ids)
   const commands: Command[] = []
+  if (edgeIds.length) commands.push({ type: 'disconnect', payload: { ids: edgeIds } })
   if (nodeIds.length) commands.push({ type: 'removeNodes', payload: { ids: nodeIds } })
   for (const id of groupIds) commands.push({ type: 'removeGroup', payload: { id } })
   return commands.length ? dispatch(batchOf(commands)) : false
@@ -114,8 +116,65 @@ export function moveCommitted(moves: { id: string; to: XY }[]): boolean {
 }
 
 /** Commits the end of a resize. `null` returns a card to its default size. */
-export function resizeCommitted(id: string, size: Size | null): boolean {
-  return dispatch({ type: 'resizeItem', payload: { id, size } })
+export function resizeCommitted(id: string, size: Size | null, position?: XY): boolean {
+  const item = board().nodes[id] ?? board().groups[id]
+  const commands: Command[] = [{ type: 'resizeItem', payload: { id, size } }]
+  // Resizing from the left or top edge also moves the item; both are one undo step.
+  if (item && position && (item.position.x !== position.x || item.position.y !== position.y)) {
+    commands.push({ type: 'moveItems', payload: { moves: [{ id, to: position }] } })
+  }
+  return dispatch(batchOf(commands))
+}
+
+/** Where one dragged item ended up. */
+export interface DragResult {
+  id: string
+  /** Position in its current parent's space (what the canvas reports). */
+  position: XY
+  /** Absolute canvas position. */
+  absolute: XY
+  /** The group it was dropped into (null for none). Ignored for groups. */
+  groupId: string | null
+}
+
+/**
+ * Commits the end of a drag as one undo step: plain moves, plus cards that were
+ * dropped into, out of or between groups (converted to the new parent's space).
+ */
+export function commitDrag(results: DragResult[]): boolean {
+  const b = board()
+  const moves: { id: string; to: XY }[] = []
+  const parents: ParentChange[] = []
+  for (const r of results) {
+    const group = b.groups[r.id]
+    if (group) {
+      if (!same(group.position, r.position)) moves.push({ id: r.id, to: r.position })
+      continue
+    }
+    const node = b.nodes[r.id]
+    if (!node) continue
+    const target =
+      node.kind === 'question' || (r.groupId && !b.groups[r.groupId]) ? null : r.groupId
+    if (node.kind !== 'question' && target !== (node.parentGroupId ?? null)) {
+      parents.push({ id: r.id, groupId: target, position: toGroupSpace(r.absolute, target, b) })
+    } else if (!same(node.position, r.position)) {
+      moves.push({ id: r.id, to: r.position })
+    }
+  }
+  const commands: Command[] = []
+  if (moves.length) commands.push({ type: 'moveItems', payload: { moves } })
+  if (parents.length) commands.push({ type: 'setParent', payload: { items: parents } })
+  return commands.length ? dispatch(batchOf(commands)) : false
+}
+
+/** Moves cards and groups by a fixed step (arrow keys), as one undo step. */
+export function nudge(ids: string[], dx: number, dy: number): boolean {
+  const b = board()
+  const moves = ids
+    .map((id) => b.nodes[id] ?? b.groups[id])
+    .filter(Boolean)
+    .map((item) => ({ id: item.id, to: { x: item.position.x + dx, y: item.position.y + dy } }))
+  return moves.length ? dispatch({ type: 'moveItems', payload: { moves } }) : false
 }
 
 /** Colours cards and groups. `null` clears a card's colour (groups always keep one). */

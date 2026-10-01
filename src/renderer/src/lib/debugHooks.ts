@@ -1,4 +1,5 @@
-import type { WaDebug } from '../../../preload/window'
+import type { WaDebug, WaDev } from '../../../preload/window'
+import { groupSelection } from '../store/actions'
 import { useAppStore } from '../store/appStore'
 import { useBoardStore } from '../store/boardStore'
 
@@ -15,7 +16,19 @@ export function createDebugHooks(): WaDebug {
   })
 }
 
+/** Development and test helpers that change the board (through the normal actions). */
+export function createDevHooks(): WaDev {
+  return Object.freeze({
+    groupSelected: (label = 'New group') =>
+      groupSelection(useAppStore.getState().session.selectedIds, label)
+  })
+}
+
 export function installDebugHooks(): void {
-  if (window.waE2E !== true) return
-  Object.defineProperty(window, '__waDebug', { value: createDebugHooks(), writable: false })
+  const e2e = window.waE2E === true
+  if (e2e)
+    Object.defineProperty(window, '__waDebug', { value: createDebugHooks(), writable: false })
+  if (e2e || import.meta.env.DEV) {
+    Object.defineProperty(window, '__waDev', { value: createDevHooks(), writable: false })
+  }
 }

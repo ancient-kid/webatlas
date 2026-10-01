@@ -1436,3 +1436,18 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
     - `researchQuestion` is taken from the question card's title at save time, which keeps it in sync with question edits (the T05 note).
   - **Capture bar:** a CSS grid inside a size container on the browser pane. It uses two rows normally, one row when the pane is at least 860px wide, and a compact layout below 420px.
   - **Placeholders until later tasks:** "Open sample workspace" reports that the sample isn't available yet (T16), the card menu's "Export JSON" says export arrives later (T16), and "Add to canvas" is disabled (T11). Import from the Home screen already works.
+- 2026-10-01 — **T09 (canvas core) implementation notes.**
+  - **Floating links:** edges don't store handle ids, so `LabeledEdge` attaches each end to the middle of the side facing the other card (`canvas/geometry.ts` `linkEnds`). Arrowheads are SVG markers coloured through CSS (one per tone: neutral, AI teal, ghost, six categories), so they follow the theme.
+  - **Linking like Obsidian:** a link can be dropped anywhere on the target card, not only on a handle (`onConnectEnd` looks up the card under the pointer).
+  - **One command per gesture:**
+    - Drags commit in `commitDrag` (moves plus parent changes, as one undo step). The drop target is the smallest group whose frame contains the card's centre.
+    - Resizes commit in `resizeCommitted(id, size, position)` (a corner resize may also move the item).
+    - Arrow keys nudge through `nudge`.
+    - `deleteSelection` also removes selected links.
+  - **Resizing:** only the four corners resize; the edge resize lines are disabled because they sat over the connection handles.
+  - **React Flow sync** (`useFlowSync`): the local node and edge arrays are rebuilt during render when the board object changes (the "adjust state during render" pattern), carrying `measured`, `selected` and `dragging` over. Selection (cards, groups and links) is mirrored into `session.selectedIds` and restored on resume.
+  - **Editing:** text is edited in place (`InlineText`). New nodes are invisible until React Flow measures them, so the editor focuses on the next frames rather than relying on `autoFocus`. Clicking empty canvas ends editing.
+  - **Dev helper:** `window.__waDev.groupSelected(label)` exists in development and E2E runs, until T10 adds the Group button. Removed in T19.
+  - **Test setup:** `src/renderer/src/test/setup.ts` stubs `ResizeObserver` and `DOMMatrixReadOnly` for React Flow in jsdom.
+  - **Moved to T18:** the "ghost nodes are prefixed `ghost-`" case in `boardToFlow.test`. Ghosts aren't drawn until T18 (`ghostsToFlow`).
+  - **Noticed for T10:** grouping packs the cards at their current top-left, so a new group can overlap other cards (for example the question card). This needs a placement pass when the Group button arrives.

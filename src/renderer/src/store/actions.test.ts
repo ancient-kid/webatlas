@@ -253,3 +253,71 @@ describe('card, edge and group actions', () => {
     expect(A.groupSelection(['question'], 'Nope')).toBeNull()
   })
 })
+
+describe('canvas gestures', () => {
+  it('commitDrag: plain moves and a drop into a group are one undo step', () => {
+    const ok = A.commitDrag([
+      { id: 'n1', position: { x: 448, y: 32 }, absolute: { x: 448, y: 32 }, groupId: null },
+      { id: 'n2', position: { x: 96, y: 480 }, absolute: { x: 96, y: 480 }, groupId: 'g1' }
+    ])
+    expect(ok).toBe(true)
+    expect(b().nodes.n1.position).toEqual({ x: 448, y: 32 })
+    expect(b().nodes.n2).toMatchObject({ parentGroupId: 'g1', position: { x: 96, y: 80 } })
+    expect(s().past).toHaveLength(1)
+    s().undo()
+    expect(b().nodes.n1.position).toEqual({ x: 400, y: 0 })
+    expect(b().nodes.n2.parentGroupId).toBeUndefined()
+  })
+
+  it('commitDrag: dragging out of a group keeps the card where it was dropped', () => {
+    A.commitDrag([
+      { id: 'n3', position: { x: 600, y: 600 }, absolute: { x: 600, y: 1000 }, groupId: null }
+    ])
+    expect(b().nodes.n3.parentGroupId).toBeUndefined()
+    expect(b().nodes.n3.position).toEqual({ x: 600, y: 1000 })
+  })
+
+  it('commitDrag: the question card never joins a group; no change → no undo step', () => {
+    A.commitDrag([
+      { id: 'question', position: { x: 64, y: 464 }, absolute: { x: 64, y: 464 }, groupId: 'g1' }
+    ])
+    expect(b().nodes.question.parentGroupId).toBeUndefined()
+    expect(b().nodes.question.position).toEqual({ x: 64, y: 464 })
+    const steps = s().past.length
+    expect(
+      A.commitDrag([
+        { id: 'n1', position: { x: 400, y: 0 }, absolute: { x: 400, y: 0 }, groupId: null }
+      ])
+    ).toBe(false)
+    expect(s().past).toHaveLength(steps)
+  })
+
+  it('commitDrag moves a dragged group', () => {
+    A.commitDrag([
+      { id: 'g1', position: { x: 32, y: 432 }, absolute: { x: 32, y: 432 }, groupId: null }
+    ])
+    expect(b().groups.g1.position).toEqual({ x: 32, y: 432 })
+  })
+
+  it('nudge moves the selection by a grid step as one undo step', () => {
+    A.nudge(['n1', 'g1'], 32, 0)
+    expect(b().nodes.n1.position).toEqual({ x: 432, y: 0 })
+    expect(b().groups.g1.position).toEqual({ x: 32, y: 400 })
+    expect(s().past).toHaveLength(1)
+  })
+
+  it('resizing from the top-left corner also moves the card, in one step', () => {
+    A.resizeCommitted('n1', { w: 320, h: 300 }, { x: 368, y: -32 })
+    expect(b().nodes.n1).toMatchObject({ size: { w: 320, h: 300 }, position: { x: 368, y: -32 } })
+    expect(s().past).toHaveLength(1)
+    s().undo()
+    expect(b().nodes.n1.size).toBeUndefined()
+    expect(b().nodes.n1.position).toEqual({ x: 400, y: 0 })
+  })
+
+  it('deleteSelection also removes selected links', () => {
+    A.deleteSelection(['e1'])
+    expect(b().edges.e1).toBeUndefined()
+    expect(b().nodes.n1).toBeDefined()
+  })
+})
