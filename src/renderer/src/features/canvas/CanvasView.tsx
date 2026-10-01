@@ -25,6 +25,7 @@ import { GRID } from '@shared/export/geometry'
 import { addNoteAt, deleteSelection, nudge } from '@renderer/store/actions'
 import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { focusSet } from '../views/focus'
 import { capture } from '../capture'
 import type { FlowEdge, FlowNode } from './boardToFlow'
 import { useCanvasUi } from './canvasUi'
@@ -133,6 +134,18 @@ function Canvas(): ReactElement {
       }),
     [rf, selectOnly]
   )
+
+  const viewMode = useAppStore((s) => s.session.viewMode)
+  const selectedIds = useAppStore((s) => s.session.selectedIds)
+  const board = useBoardStore((s) => s.board)
+
+  useEffect(() => {
+    if (viewMode !== 'focus') return
+    const set = focusSet(board, selectedIds)
+    if (set.size === 0) return
+    const targetNodes = Array.from(set).map((id) => ({ id }))
+    void rf.fitView({ nodes: targetNodes, padding: 0.3, duration: 250 })
+  }, [viewMode, selectedIds, board, rf])
 
   const onDoubleClick = (e: MouseEvent<HTMLDivElement>): void => {
     if (!(e.target as Element).classList.contains('react-flow__pane')) return

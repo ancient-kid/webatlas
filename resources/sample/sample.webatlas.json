@@ -1,0 +1,352 @@
+{
+  "format": "webatlas",
+  "version": 1,
+  "workspace": {
+    "version": 1,
+    "id": "sample-coastal-adaptation",
+    "name": "Sample: Coastal adaptation",
+    "researchQuestion": "How do coastal cities fund climate adaptation?",
+    "createdAt": 1727780000000,
+    "updatedAt": 1727780000000,
+    "session": {
+      "viewport": { "x": 0, "y": 0, "zoom": 0.8 },
+      "selectedIds": [],
+      "browserUrl": "https://en.wikipedia.org/wiki/Climate_change_adaptation",
+      "viewMode": "graph",
+      "captureMode": "manual",
+      "browserOpen": true,
+      "splitRatio": 42
+    },
+    "board": {
+      "nodes": {
+        "q-root": {
+          "id": "q-root",
+          "kind": "question",
+          "title": "How do coastal cities fund climate adaptation?",
+          "highlights": [],
+          "note": "",
+          "comments": [],
+          "tags": [],
+          "position": { "x": 400, "y": 200 },
+          "capturedAt": 1727780000000
+        },
+        "card-wiki-adaptation": {
+          "id": "card-wiki-adaptation",
+          "kind": "webpage",
+          "title": "Climate change adaptation - Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Climate_change_adaptation",
+          "summary": "Overview of adaptation strategies, ecological infrastructure, and financial barriers for coastal municipalities.",
+          "highlights": [
+            {
+              "id": "h-wiki-1",
+              "quote": "Coastal adaptation requires blended finance across municipal bonds, sovereign funds and international grants.",
+              "createdAt": 1727780010000
+            }
+          ],
+          "note": "Key introductory reading on adaptation definitions.",
+          "comments": [],
+          "tags": ["adaptation", "overview"],
+          "color": "teal",
+          "parentGroupId": "group-funding",
+          "position": { "x": 32, "y": 64 },
+          "capturedAt": 1727780010000
+        },
+        "card-wiki-bonds": {
+          "id": "card-wiki-bonds",
+          "kind": "webpage",
+          "title": "Green bond - Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Green_bond",
+          "summary": "Fixed-income financial instruments designed specifically to support climate-related or environmental projects.",
+          "highlights": [
+            {
+              "id": "h-bonds-1",
+              "quote": "Municipal green bonds have expanded rapidly in Europe and North America to fund storm surge barriers.",
+              "createdAt": 1727780020000
+            }
+          ],
+          "note": "Check difference between sovereign and municipal issuances.",
+          "comments": [],
+          "tags": ["bonds", "finance"],
+          "color": "teal",
+          "parentGroupId": "group-funding",
+          "position": { "x": 320, "y": 64 },
+          "capturedFromNodeId": "card-wiki-adaptation",
+          "capturedAt": 1727780020000
+        },
+        "card-oecd-finance": {
+          "id": "card-oecd-finance",
+          "kind": "webpage",
+          "title": "Financing Climate Adaptation in Cities - OECD",
+          "url": "https://oecd.org/environment/financing-climate-adaptation-cities.htm",
+          "summary": "Policy framework assessing municipal capacity to leverage private sector capital for sea walls and flood defence.",
+          "highlights": [
+            {
+              "id": "h-oecd-1",
+              "quote": "Only 12% of total climate finance reaches local governments directly.",
+              "createdAt": 1727780030000
+            }
+          ],
+          "note": "Crucial statistic to cite in the opening paragraph.",
+          "comments": [],
+          "tags": ["must-cite", "policy"],
+          "color": "rose",
+          "parentGroupId": "group-must-cite",
+          "position": { "x": 32, "y": 64 },
+          "capturedAt": 1727780030000
+        },
+        "card-worldbank-resilience": {
+          "id": "card-worldbank-resilience",
+          "kind": "webpage",
+          "title": "Investing in Urban Resilience - World Bank",
+          "url": "https://worldbank.org/en/topic/disasterriskmanagement/publication/investing-urban-resilience",
+          "summary": "Economic analysis demonstrating that every dollar invested in resilient infrastructure yields four dollars in avoided damages.",
+          "highlights": [
+            {
+              "id": "h-wb-1",
+              "quote": "Every $1 invested in infrastructure resilience saves $4 over the asset lifecycle.",
+              "createdAt": 1727780040000
+            }
+          ],
+          "note": "4:1 benefit-cost ratio argument.",
+          "comments": [],
+          "tags": ["must-cite", "economics"],
+          "color": "rose",
+          "parentGroupId": "group-must-cite",
+          "position": { "x": 320, "y": 64 },
+          "capturedFromNodeId": "card-oecd-finance",
+          "capturedAt": 1727780040000
+        },
+        "card-ipcc-report": {
+          "id": "card-ipcc-report",
+          "kind": "pdf",
+          "title": "IPCC AR6 WG2 Chapter 6: Cities, Settlements and Key Infrastructure",
+          "url": "https://ipcc.ch/report/ar6/wg2/chapter06.pdf",
+          "summary": "Sixth Assessment Report synthesis of global observed impacts, adaptation limits, and governance mechanisms in coastal deltas.",
+          "highlights": [
+            {
+              "id": "h-ipcc-1",
+              "quote": "Sea level rise will challenge traditional hard engineering, necessitating flexible spatial planning and insurance pools.",
+              "createdAt": 1727780050000
+            }
+          ],
+          "note": "Section 6.4 covers municipal adaptation finance gaps.",
+          "comments": [],
+          "tags": ["must-cite", "science"],
+          "color": "rose",
+          "parentGroupId": "group-must-cite",
+          "position": { "x": 608, "y": 64 },
+          "capturedAt": 1727780050000
+        },
+        "card-rotterdam-video": {
+          "id": "card-rotterdam-video",
+          "kind": "video",
+          "title": "Rotterdam: Living With Water - Resilient Urban Design",
+          "url": "https://youtube.com/watch?v=rotterdam123",
+          "summary": "Documentary exploring the water square Benthemplein and subterranean car-park water storage solutions.",
+          "highlights": [
+            {
+              "id": "h-rotterdam-1",
+              "quote": "Benthemplein functions as an amphitheatre during dry periods and collects 1.7 million litres of rainwater during storms.",
+              "createdAt": 1727780060000
+            }
+          ],
+          "note": "Great visual case study of dual-purpose public spaces.",
+          "comments": [],
+          "tags": ["rotterdam", "case-study"],
+          "color": "moss",
+          "parentGroupId": "group-cases",
+          "position": { "x": 32, "y": 64 },
+          "capturedAt": 1727780060000
+        },
+        "card-jakarta-sea-wall": {
+          "id": "card-jakarta-sea-wall",
+          "kind": "webpage",
+          "title": "Giant Sea Wall Jakarta: Megaproject Challenges",
+          "url": "https://reuters.com/investigates/special-report/indonesia-jakarta-sinking",
+          "summary": "Investigative report on land subsidence, sea defence construction costs, and community relocation issues in North Jakarta.",
+          "highlights": [
+            {
+              "id": "h-jakarta-1",
+              "quote": "North Jakarta has sunk up to 2.5 metres in ten years due to unregulated groundwater extraction.",
+              "createdAt": 1727780070000
+            }
+          ],
+          "note": "Contrasting case: hard engineering barriers vs land subsidence.",
+          "comments": [],
+          "tags": ["jakarta", "case-study"],
+          "color": "moss",
+          "parentGroupId": "group-cases",
+          "position": { "x": 320, "y": 64 },
+          "capturedFromNodeId": "card-rotterdam-video",
+          "capturedAt": 1727780070000
+        },
+        "card-venice-mose": {
+          "id": "card-venice-mose",
+          "kind": "webpage",
+          "title": "MOSE Barrier System in Venice Lagoon",
+          "url": "https://theguardian.com/environment/2023/venice-mose-barrier-flood-defence",
+          "summary": "Longitudinal operational analysis of mobile floodgates protecting Venice against record acqua alta high tides.",
+          "highlights": [
+            {
+              "id": "h-venice-1",
+              "quote": "Operational maintenance costs exceed 100 million euros annually, creating long-term fiscal burdens.",
+              "createdAt": 1727780080000
+            }
+          ],
+          "note": "Operating expenditure vs initial capital expenditure problem.",
+          "comments": [],
+          "tags": ["venice", "case-study"],
+          "color": "moss",
+          "parentGroupId": "group-cases",
+          "position": { "x": 608, "y": 64 },
+          "capturedFromNodeId": "card-jakarta-sea-wall",
+          "capturedAt": 1727780080000
+        },
+        "card-standalone-insurance": {
+          "id": "card-standalone-insurance",
+          "kind": "webpage",
+          "title": "Parametric Flood Insurance in the Caribbean - CCRIF",
+          "url": "https://ccrif.org/en/about-us",
+          "summary": "Multi-country catastrophe risk pooling mechanism enabling rapid liquidity payouts post-hurricane.",
+          "highlights": [
+            {
+              "id": "h-ins-1",
+              "quote": "Parametric triggers pay out within 14 days of defined tropical storm windspeeds.",
+              "createdAt": 1727780090000
+            }
+          ],
+          "note": "Novel financial instrument alternative to traditional disaster aid.",
+          "comments": [],
+          "tags": ["insurance", "finance"],
+          "position": { "x": 100, "y": 900 },
+          "capturedAt": 1727780090000
+        },
+        "card-standalone-coastal-act": {
+          "id": "card-standalone-coastal-act",
+          "kind": "webpage",
+          "title": "US Coastal Zone Management Act Evaluation",
+          "url": "https://noaa.gov/coastal-zone-management-act",
+          "summary": "National coastal resilience grant distribution across federal, state and tribal agencies.",
+          "highlights": [],
+          "note": "Look at Section 309 enhancement grants.",
+          "comments": [],
+          "tags": ["policy"],
+          "position": { "x": 400, "y": 900 },
+          "capturedAt": 1727780100000
+        },
+        "card-note-synthesis": {
+          "id": "card-note-synthesis",
+          "kind": "note",
+          "title": "Synthesis: CapEx vs OpEx in Barrier Projects",
+          "note": "Hard coastal defences (like Venice MOSE) incur recurrent operational costs that strain city budgets. Nature-based solutions (like Rotterdam water squares) distribute costs across recreation and water utility budgets.",
+          "highlights": [],
+          "comments": [],
+          "tags": ["synthesis"],
+          "position": { "x": 700, "y": 900 },
+          "capturedAt": 1727780110000
+        },
+        "card-note-supervisor": {
+          "id": "card-note-supervisor",
+          "kind": "note",
+          "title": "Questions for Supervisor",
+          "note": "1. Should we focus exclusively on OECD cities or contrast with Global South deltas?\n2. Is green bond revenue transparency sufficient for quantitative analysis?",
+          "highlights": [],
+          "comments": [],
+          "tags": ["todo"],
+          "position": { "x": 950, "y": 900 },
+          "capturedAt": 1727780120000
+        }
+      },
+      "groups": {
+        "group-funding": {
+          "id": "group-funding",
+          "label": "Funding models",
+          "category": "topic",
+          "color": "teal",
+          "note": "",
+          "comments": [],
+          "position": { "x": -50, "y": -250 },
+          "size": { "w": 620, "h": 340 }
+        },
+        "group-must-cite": {
+          "id": "group-must-cite",
+          "label": "Must cite",
+          "category": "importance",
+          "color": "rose",
+          "note": "",
+          "comments": [],
+          "position": { "x": 600, "y": -250 },
+          "size": { "w": 910, "h": 340 }
+        },
+        "group-cases": {
+          "id": "group-cases",
+          "label": "Case studies",
+          "category": "topic",
+          "color": "moss",
+          "note": "",
+          "comments": [],
+          "position": { "x": 100, "y": 500 },
+          "size": { "w": 910, "h": 340 }
+        }
+      },
+      "edges": {
+        "edge-opened-1": {
+          "id": "edge-opened-1",
+          "source": "card-wiki-adaptation",
+          "target": "card-wiki-bonds",
+          "relation": "opened-from",
+          "origin": "provenance"
+        },
+        "edge-opened-2": {
+          "id": "edge-opened-2",
+          "source": "card-oecd-finance",
+          "target": "card-worldbank-resilience",
+          "relation": "opened-from",
+          "origin": "provenance"
+        },
+        "edge-opened-3": {
+          "id": "edge-opened-3",
+          "source": "card-rotterdam-video",
+          "target": "card-jakarta-sea-wall",
+          "relation": "opened-from",
+          "origin": "provenance"
+        },
+        "edge-opened-4": {
+          "id": "edge-opened-4",
+          "source": "card-jakarta-sea-wall",
+          "target": "card-venice-mose",
+          "relation": "opened-from",
+          "origin": "provenance"
+        },
+        "edge-typed-1": {
+          "id": "edge-typed-1",
+          "source": "card-worldbank-resilience",
+          "target": "q-root",
+          "relation": "supports",
+          "label": "supports",
+          "color": "teal",
+          "origin": "user"
+        },
+        "edge-typed-2": {
+          "id": "edge-typed-2",
+          "source": "card-ipcc-report",
+          "target": "q-root",
+          "relation": "answers",
+          "label": "answers",
+          "color": "teal",
+          "origin": "user"
+        },
+        "edge-typed-3": {
+          "id": "edge-typed-3",
+          "source": "card-note-synthesis",
+          "target": "card-rotterdam-video",
+          "relation": "supports",
+          "label": "supports",
+          "color": "moss",
+          "origin": "user"
+        }
+      },
+      "ghosts": {}
+    }
+  }
+}

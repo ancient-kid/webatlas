@@ -27,6 +27,7 @@ import {
   openWorkspace,
   openWorkspaceById
 } from '@renderer/store/workspaceActions'
+import { toWorkspaceFile } from '@shared/export/workspaceFile'
 import { NewWorkspaceDialog } from './NewWorkspaceDialog'
 import { Welcome } from './Welcome'
 
@@ -91,6 +92,21 @@ export function Home(): ReactElement {
     }
   }
 
+  const exportJson = async (row: WorkspaceSummary): Promise<void> => {
+    try {
+      const ws = await window.api.workspace.load(row.id)
+      const file = toWorkspaceFile(ws)
+      const content = JSON.stringify(file, null, 2)
+      const path = await window.api.export.save('json', content, ws.name)
+      if (path) {
+        const fileName = path.split(/[\\/]/).pop()
+        toast(`Exported to ${fileName}`)
+      }
+    } catch (err) {
+      fail("Couldn't export workspace")(err)
+    }
+  }
+
   const remove = async (row: WorkspaceSummary): Promise<void> => {
     try {
       await window.api.workspace.delete(row.id)
@@ -143,7 +159,7 @@ export function Home(): ReactElement {
                       <DropdownMenuItem onSelect={() => void duplicate(row)}>
                         Duplicate
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => toast('Export arrives in a later step.')}>
+                      <DropdownMenuItem onSelect={() => void exportJson(row)}>
                         Export JSON
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

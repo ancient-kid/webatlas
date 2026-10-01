@@ -6,7 +6,7 @@ import { CHANNELS, type ApiMethod } from '@shared/api'
 import type { OrganizeResult } from '@shared/types'
 import { summarize } from './ai/summarize'
 import { aiStatus } from './env'
-import { importFromDialog, saveExport } from './exportImport'
+import { importFromDialog, importSample, saveExport } from './exportImport'
 import {
   createWorkspace,
   deleteWorkspace,
@@ -59,7 +59,5 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
 
   handle('export.save', (format, content, name) => saveExport(getWindow(), format, content, name))
   handle('import.workspace', () => importFromDialog(getWindow()))
-  handle('import.sample', () => {
-    throw new Error('The sample workspace is not available yet.')
-  })
+  handle('import.sample', () => importSample())
 }

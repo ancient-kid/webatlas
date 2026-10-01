@@ -12,10 +12,11 @@ import {
   type OnConnectEnd,
   type OnNodeDrag
 } from '@xyflow/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { commitDrag, connectNodes, type DragResult } from '@renderer/store/actions'
 import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { focusSet } from '../views/focus'
 import { boardToEdges, boardToFlow, type FlowEdge, type FlowNode } from './boardToFlow'
 import { findDropGroup, type Rect } from './geometry'
 
@@ -131,6 +132,43 @@ export function useFlowSync(): FlowSync {
     setNodes((ns) => withSelection(ns, (id) => keep.has(id)))
     setEdges((es) => withSelection(es, (id) => keep.has(id)))
   }, [])
+  const viewMode = useAppStore((s) => s.session.viewMode)
+  const selectedIds = useAppStore((s) => s.session.selectedIds)
+
+  const displayNodes = useMemo(() => {
+    if (viewMode !== 'focus') {
+      return nodes.map((n) =>
+        n.className?.includes('wa-dim')
+          ? { ...n, className: n.className.replace(/\bwa-dim\b/g, '').trim() }
+          : n
+      )
+    }
+    const set = focusSet(board, selectedIds)
+    return nodes.map((n) => {
+      const isDim = !set.has(n.id)
+      const base = n.className?.replace(/\bwa-dim\b/g, '').trim() || ''
+      const className = isDim ? (base ? `${base} wa-dim` : 'wa-dim') : base
+      return n.className === className ? n : { ...n, className }
+    })
+  }, [nodes, viewMode, selectedIds, board])
+
+  const displayEdges = useMemo(() => {
+    if (viewMode !== 'focus') {
+      return edges.map((e) =>
+        e.className?.includes('wa-dim')
+          ? { ...e, className: e.className.replace(/\bwa-dim\b/g, '').trim() }
+          : e
+      )
+    }
+    const set = focusSet(board, selectedIds)
+    return edges.map((e) => {
+      const isDim = !set.has(e.source) || !set.has(e.target)
+      const base = e.className?.replace(/\bwa-dim\b/g, '').trim() || ''
+      const className = isDim ? (base ? `${base} wa-dim` : 'wa-dim') : base
+      return e.className === className ? e : { ...e, className }
+    })
+  }, [edges, viewMode, selectedIds, board])
+
   const selectAll = useCallback(() => {
     setNodes((ns) => withSelection(ns, () => true))
     setEdges((es) => withSelection(es, () => false))
@@ -138,8 +176,8 @@ export function useFlowSync(): FlowSync {
   const clearSelection = useCallback(() => selectOnly([]), [selectOnly])
 
   return {
-    nodes,
-    edges,
+    nodes: displayNodes,
+    edges: displayEdges,
     onNodesChange,
     onEdgesChange,
     onConnect,

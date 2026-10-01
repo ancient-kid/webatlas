@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   Compass,
+  Download,
   FileText,
   Focus,
   Globe,
@@ -65,7 +66,9 @@ export const ICONS = {
   'panel-close': PanelLeftClose,
   'panel-open': PanelLeftOpen,
   undo: Undo2,
-  redo: Redo2
+  redo: Redo2,
+  export: Download,
+  download: Download
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof ICONS

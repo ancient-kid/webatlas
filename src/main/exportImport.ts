@@ -7,6 +7,7 @@ import type { ExportFormat } from '@shared/api'
 import type { Workspace } from '@shared/types'
 import { safeFileName } from './fileNames'
 import { atomicWrite } from './storage/atomicWrite'
+import { thumbDir } from './storage/paths'
 import { importWorkspaceFile } from './storage/workspaceStore'
 
 const FORMATS: Record<ExportFormat, { ext: string; label: string }> = {
@@ -48,7 +49,35 @@ export async function saveExport(
     target = result.canceled || !result.filePath ? null : result.filePath
   }
   if (!target) return null
-  await atomicWrite(target, content)
+
+  let fileContent = content
+  if (format === 'json') {
+    try {
+      const parsed = JSON.parse(content)
+      if (parsed.workspace && parsed.workspace.id) {
+        const wsId = parsed.workspace.id
+        const thumbs: Record<string, string> = {}
+        const tDir = thumbDir(wsId)
+        const files = await fs.readdir(tDir).catch(() => [])
+        for (const f of files) {
+          if (!f.endsWith('.png')) continue
+          const nodeId = f.slice(0, -4)
+          const p = join(tDir, f)
+          const stat = await fs.stat(p).catch(() => null)
+          if (stat && stat.size <= 400 * 1024) {
+            const buf = await fs.readFile(p)
+            thumbs[nodeId] = `data:image/png;base64,${buf.toString('base64')}`
+          }
+        }
+        parsed.thumbs = thumbs
+        fileContent = JSON.stringify(parsed, null, 2)
+      }
+    } catch {
+      // ignore JSON parse error
+    }
+  }
+
+  await atomicWrite(target, fileContent)
   return target
 }
 
@@ -87,5 +116,26 @@ export async function importFromDialog(win: BrowserWindow | null): Promise<Works
   } catch {
     throw new Error("This file isn't a WebAtlas workspace")
   }
+  return importWorkspaceFile(data)
+}
+
+/** Imports the bundled sample workspace. */
+export async function importSample(): Promise<Workspace> {
+  const candidates = [
+    join(app.getAppPath(), 'resources/sample/sample.webatlas.json'),
+    join(process.cwd(), 'resources/sample/sample.webatlas.json'),
+    join(__dirname, '../../resources/sample/sample.webatlas.json')
+  ]
+  let raw: string | null = null
+  for (const p of candidates) {
+    try {
+      raw = await fs.readFile(p, 'utf8')
+      break
+    } catch {
+      // try next
+    }
+  }
+  if (!raw) throw new Error('The sample workspace is not available.')
+  const data = JSON.parse(raw)
   return importWorkspaceFile(data)
 }

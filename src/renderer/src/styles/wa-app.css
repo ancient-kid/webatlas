@@ -601,3 +601,16 @@ input.wa-cap__url {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Dimmed state in Focus view (T15). */
+.wa-dim {
+  opacity: 0.15;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+/* Command palette interactive selection (T14). */
+.wa-pal__row[data-selected='true'],
+.wa-pal__row[aria-selected='true'] {
+  background: var(--brand-soft);
+}

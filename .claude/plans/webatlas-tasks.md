@@ -64,9 +64,9 @@ Status legend: ⬜ not started · 🔄 in progress · 👀 awaiting your check �
 | T11 | Capture pipeline + summaries | 5.1–5.3, 5.7 | T09, T02 | 👀 |
 | T12 | Hotkeys, context menu, highlights, link drop | 5.4–5.6 | T11 | 👀 |
 | T13 | Inspector side panel | 6.1 | T09 | 👀 |
-| T14 | Ctrl+K search | 6.2 | T09 | ⬜ |
-| T15 | Focus and list views | 6.3, 6.4 | T09 | ⬜ |
-| T16 | Export, import, sample placeholder, hints | 7.1–7.4 | T08, T09 | ⬜ |
+| T14 | Ctrl+K search | 6.2 | T09 | 👀 |
+| T15 | Focus and list views | 6.3, 6.4 | T09 | 👀 |
+| T16 | Export, import, sample placeholder, hints | 7.1–7.4 | T08, T09 | 👀 |
 | T17 | AI backend: embeddings, clustering, Organize agent | 8.1–8.4 | T03, T06 | ⬜ |
 | T18 | Ghost UI + Spike 3 ⏸ | 8.6, 8.5 | T17, T09, T11 | ⬜ |
 | T19 | Polish, real sample, full regression, 3× rehearsal | 9.1, 9.2 | all | ⬜ |

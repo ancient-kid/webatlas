@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { FIXTURE_ORIGIN } from '../playwright.config'
 import type { CanvasNode } from '../src/shared/types'
-import { clickEmpty, createWorkspace, getBoard, pane } from './helpers/canvas'
+import { clickEmpty, createWorkspace, getBoard } from './helpers/canvas'
 import { launchApp, type LaunchedApp } from './helpers/launch'
 
 const ARTICLE = `${FIXTURE_ORIGIN}/article.html`
