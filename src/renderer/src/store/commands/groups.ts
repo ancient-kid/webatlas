@@ -45,7 +45,9 @@ export function layoutGroup(
       label: group.label,
       color: group.color,
       category: group.category,
-      position: { x: minX - GROUP_PAD.side, y: minY - GROUP_PAD.top },
+      position: group.position
+        ? { x: group.position.x, y: group.position.y }
+        : { x: minX - GROUP_PAD.side, y: minY - GROUP_PAD.top },
       size: { w: GROUP_PAD.side + cols * cellW, h: GROUP_PAD.top + rows * cellH },
       note: '',
       comments: []

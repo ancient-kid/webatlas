@@ -14,6 +14,7 @@ import { memo, type CSSProperties, type ReactElement } from 'react'
 import { CATS } from '@shared/types'
 import { cn } from '@renderer/lib/utils'
 import { useBoardStore } from '@renderer/store/boardStore'
+import { useCanvasUi } from '../canvasUi'
 import type { FlowEdge } from '../boardToFlow'
 import { linkEnds, type Rect, type Side } from '../geometry'
 import { edgeTone, relationLabel, toneColor } from '../relations'
@@ -69,6 +70,10 @@ export const LabeledEdge = memo(function LabeledEdge({
         <span
           className={cn('wa-edge__label nodrag nopan', selected && 'wa-edge__label--selected')}
           data-edge-id={id}
+          onDoubleClick={(e) => {
+            e.stopPropagation()
+            useCanvasUi.getState().openEdgeMenu({ id, x: e.clientX, y: e.clientY })
+          }}
           style={
             {
               '--ec': colour,

@@ -12,6 +12,7 @@ import { useAppStore } from '@renderer/store/appStore'
 import { useBoardStore } from '@renderer/store/boardStore'
 import { closeWorkspace } from '@renderer/store/workspaceActions'
 import { BrowserPane } from '../browser/BrowserPane'
+import { useCaptureCommands } from '../capture/useCaptureCommands'
 import { CanvasView } from '../canvas/CanvasView'
 import { SplitLayout } from './SplitLayout'
 
@@ -25,6 +26,7 @@ export function WorkspaceScreen(): ReactElement {
   const canUndo = useBoardStore((s) => s.past.length > 0)
   const canRedo = useBoardStore((s) => s.future.length > 0)
   const lastToggle = useRef(0)
+  useCaptureCommands()
 
   const toggleBrowser = (): void => {
     lastToggle.current = Date.now()

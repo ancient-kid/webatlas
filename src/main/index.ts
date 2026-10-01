@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { installCloseHandshake } from './closeHandshake'
 import { loadEnv } from './env'
-import { buildAppMenu } from './menu'
+import { buildAppMenu, buildPageContextMenu } from './menu'
 import { registerIpc } from './ipc'
 import { pendingWrites } from './storage/atomicWrite'
 import { initPaths } from './storage/paths'
@@ -107,6 +107,15 @@ app.on('web-contents-created', (_event, contents) => {
   contents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//.test(url)) mainWindow?.webContents.send('browser:open-url', url)
     return { action: 'deny' }
+  })
+  // Right-click in a page: add the selection, a link or the page to the canvas.
+  contents.on('context-menu', (_e, params) => {
+    const menu = buildPageContextMenu(params, contents, (action) =>
+      mainWindow?.webContents.send('browser:context-action', action)
+    )
+    // Tests read and click the menu instead of popping up a native one.
+    if (isE2E) (globalThis as { __waContextMenu?: Electron.Menu }).__waContextMenu = menu
+    else if (mainWindow) menu.popup({ window: mainWindow })
   })
 })
 

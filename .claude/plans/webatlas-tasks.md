@@ -59,10 +59,10 @@ Status legend: ⬜ not started · 🔄 in progress · 👀 awaiting your check �
 | T06 | Main storage, thumbnails, IPC bridge | 2.1–2.4 | T04 | 👀 |
 | T07 | Design system port + dev gallery | 3.1–3.3 | T01 | ✅ |
 | T08 | Home, new workspace, split screen, autosave/resume | 3.4–3.6 | T05, T06, T07 | ✅ |
-| T09 | Canvas core | 4.1–4.4 | T08 | 👀 |
-| T10 | Selection toolbar + edge editor | 4.5 | T09 | ⬜ |
-| T11 | Capture pipeline + summaries | 5.1–5.3, 5.7 | T09, T02 | ⬜ |
-| T12 | Hotkeys, context menu, highlights, link drop | 5.4–5.6 | T11 | ⬜ |
+| T09 | Canvas core | 4.1–4.4 | T08 | ✅ |
+| T10 | Selection toolbar + edge editor | 4.5 | T09 | 👀 |
+| T11 | Capture pipeline + summaries | 5.1–5.3, 5.7 | T09, T02 | 👀 |
+| T12 | Hotkeys, context menu, highlights, link drop | 5.4–5.6 | T11 | 👀 |
 | T13 | Inspector side panel | 6.1 | T09 | ⬜ |
 | T14 | Ctrl+K search | 6.2 | T09 | ⬜ |
 | T15 | Focus and list views | 6.3, 6.4 | T09 | ⬜ |

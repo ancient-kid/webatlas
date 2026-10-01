@@ -27,3 +27,12 @@ export function toneColor(tone: string): string {
   if (tone === 'ghost') return 'var(--ghost-line)'
   return `var(--${tone})`
 }
+
+/** Relations the student can choose (opened from is set by capture, not by hand). */
+export const EDITABLE_RELATIONS: Exclude<Relation, 'opened-from' | 'custom'>[] = [
+  'related',
+  'supports',
+  'contradicts',
+  'answers',
+  'source-of'
+]

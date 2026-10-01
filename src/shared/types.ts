@@ -122,6 +122,8 @@ export interface NewGroup {
   label: string
   color: Cat
   category: GroupCategory
+  /** Where to put the frame; by default just above and left of its members. */
+  position?: XY
 }
 
 export interface ParentChange {

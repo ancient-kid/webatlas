@@ -4,6 +4,7 @@
 import { ipcMain, type BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import { CHANNELS, type ApiMethod } from '@shared/api'
 import type { OrganizeResult } from '@shared/types'
+import { summarize } from './ai/summarize'
 import { aiStatus } from './env'
 import { importFromDialog, saveExport } from './exportImport'
 import {
@@ -46,9 +47,9 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
 
   handle('thumb.save', (ws, nodeId, dataUrl) => saveThumb(ws, nodeId, dataUrl))
 
-  // AI: stubs until T11 (summaries) and T17 (embeddings, Organize).
+  handle('ai.summarize', (text) => summarize(text))
+  // AI: stubs until T17 (embeddings, Organize).
   handle('ai.embed', () => ({}))
-  handle('ai.summarize', () => '')
   handle('ai.organize', (): OrganizeResult => ({
     ghosts: [],
     mode: 'offline',

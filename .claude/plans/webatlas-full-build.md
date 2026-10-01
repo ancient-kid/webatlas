@@ -1451,3 +1451,34 @@ This is about 0.9 h over the architecture's 6 h. Parallelising Phase 2 with Phas
   - **Test setup:** `src/renderer/src/test/setup.ts` stubs `ResizeObserver` and `DOMMatrixReadOnly` for React Flow in jsdom.
   - **Moved to T18:** the "ghost nodes are prefixed `ghost-`" case in `boardToFlow.test`. Ghosts aren't drawn until T18 (`ghostsToFlow`).
   - **Noticed for T10:** grouping packs the cards at their current top-left, so a new group can overlap other cards (for example the question card). This needs a placement pass when the Group button arrives.
+- 2026-10-01 — **T10–T12 built as one batch, at the user's request** (with tests, checklists and a break-it check for each).
+  - **T10 (toolbar, link editor):**
+    - `SelectionToolbar` uses React Flow `NodeToolbar` around a store-driven `SelectionControls`, which can be tested without React Flow.
+    - **Note button:** on a page card it opens a small popover for the card's own note (the Inspector arrives in T13); on a note or the question it starts in-place editing.
+    - **Tag popover** suggests existing tags.
+    - **Group** (2+ cards) creates "New group" with its label ready to rename.
+    - **New groups never cover other cards:** `NewGroup.position` is now optional in the command, and `groupSelection` picks a free spot when the natural frame would overlap (this resolves the T09 note).
+    - **Link menu:** opened by double-clicking a link or its label; it holds the relations, Custom… (label field) and Delete link.
+    - **Link labels** sit above everything, including links inside groups.
+    - **Registries:** `canvasControl` (select, reveal, zoomTo, centre) and `browserControl` (navigate, exec, thumbnail and more) let features reach the canvas and the browser without prop drilling.
+  - **T11 (capture):**
+    - `features/capture/capture.ts` is a pure pipeline with injected dependencies; `capture/index.ts` wires it to the real app.
+    - **Provenance:** typing an address resets the parent; following a link keeps it; revisiting a captured page makes that card the parent; a capture becomes the parent.
+    - **Race fixed:** the parent is decided when a capture starts. A slow capture doesn't become the parent if an address was typed while it ran.
+    - Each capture plus its "opened from" link is one undo step. The summary arrives later through `patchSilently`, with no undo step.
+    - **Uncapturable pages:** Google's own pages (home, `/search`, `/webhp`) and non-http pages give a toast instead (silent in Auto mode).
+    - **Auto mode** captures 1.5 s after the page settles and dedupes by normalised URL.
+    - **Groq summaries** live in `src/main/ai/summarize.ts`. Test runs (`WA_E2E` with `WA_AI_MOCK=1`) return a fixed mock sentence.
+    - **CSP:** `img-src` now allows `http:` so favicons from plain-http sites load.
+    - **Cards** show at most four lines of the newest highlight.
+  - **T12 (shortcuts, context menu, highlights, link drop):**
+    - **Research menu:** Alt+A capture, Alt+H highlight, Ctrl+K search (placeholder toast until T14), Ctrl+L address bar.
+    - **Hidden browser:** with the pane hidden, Alt+A and Alt+H show it and explain, instead of capturing.
+    - **Right-click menu** (`buildPageContextMenu`): Add highlight / link / page to canvas, plus Copy. E2E runs keep the menu on `globalThis.__waContextMenu` instead of popping it up.
+    - **Highlights** are capped at 600 characters; a page not yet on the canvas is captured first.
+    - **Links dropped** on the canvas (`text/uri-list`) become cards at the drop point.
+- 2026-10-01 — **Groq model changed to `qwen/qwen3.8-27b`** (user's decision: Groq discontinued the Llama models). This replaces the "Assumed: llama-3.1-8b-instant / llama-3.3-70b-versatile" note in Open Questions.
+  - It is the default in `src/main/ai/summarize.ts` (`DEFAULT_GROQ_MODEL`) and in `.env.example`, for both `GROQ_MODEL` and `GROQ_ORGANIZE_MODEL`. `GROQ_MODEL` in `.env` still overrides it.
+  - Qwen 3 reasons before answering by default, so summaries send `reasoning_effort: "none"` (documented at console.groq.com/docs/reasoning). `cleanSummary` also drops any `<think>…</think>` block.
+  - **Checked live:** one sentence returned in 191 ms with no reasoning text.
+  - **For T17 (Organize fallback on Groq):** decide per call whether reasoning helps; if it's left on, use `reasoning_format: "hidden"` or `"parsed"` and allow a bigger `max_tokens`.

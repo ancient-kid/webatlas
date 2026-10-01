@@ -578,3 +578,26 @@ input.wa-cap__url {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+/* Existing-tag suggestions in the tag popover. */
+.wa-tag-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.wa-tag-button:hover .wa-tag {
+  background: var(--brand-soft);
+}
+/* Link labels stay on top, including links between cards inside a group (which React
+   Flow raises above the label layer). */
+.wa-canvas-rf .react-flow__edgelabel-renderer {
+  z-index: 1001;
+}
+/* A card shows the start of its newest highlight; the full quote lives in the side panel. */
+.wa-card .wa-quote {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

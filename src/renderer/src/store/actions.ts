@@ -14,6 +14,7 @@ import {
   type Ghost,
   type GroupCategory,
   type GroupPatch,
+  type NewGroup,
   type NodePatch,
   type ParentChange,
   type Relation,
@@ -22,7 +23,9 @@ import {
 } from '@shared/types'
 import { useBoardStore, type BoardState } from './boardStore'
 import { batchOf } from './commands/def'
+import { layoutGroup } from './commands/groups'
 import { canApply } from './commands/registry'
+import { findFreeSpot } from '../features/canvas/placement'
 
 /** Group colour used when none is chosen. */
 export const DEFAULT_GROUP_COLOR: Record<GroupCategory, Cat> = {
@@ -270,9 +273,32 @@ export function groupSelection(
   category: GroupCategory = 'topic',
   color: Cat = DEFAULT_GROUP_COLOR[category]
 ): string | null {
-  const group = { id: newId(), label: label.trim(), color, category }
+  const group: NewGroup = { id: newId(), label: label.trim(), color, category }
+  const position = groupPlacement(group, ids)
+  if (position) group.position = position
   const ok = dispatch({ type: 'createGroup', payload: { group, memberIds: ids } })
   return ok ? group.id : null
+}
+
+/**
+ * Where a new group's frame should go: its natural spot (around its members) unless that
+ * would cover other cards or groups, in which case the nearest free spot. Null = natural.
+ */
+function groupPlacement(group: NewGroup, ids: string[]): XY | null {
+  const b = board()
+  const members = [...new Set(ids)]
+    .map((id) => b.nodes[id])
+    .filter((n) => n && n.kind !== 'question')
+  if (!members.length) return null
+  const { group: frame } = layoutGroup(b, group, members)
+  const memberIds = new Set(members.map((n) => n.id))
+  // The board as it will be around the new frame: without the cards that move into it.
+  const others: Board = {
+    ...b,
+    nodes: Object.fromEntries(Object.entries(b.nodes).filter(([id]) => !memberIds.has(id)))
+  }
+  const spot = findFreeSpot(others, frame.position, frame.size)
+  return spot.x === frame.position.x && spot.y === frame.position.y ? null : spot
 }
 
 /** Changes group fields (label, colour, category, note); unchanged fields are ignored. */
@@ -373,4 +399,29 @@ export function acceptAllGhosts(): number {
 export function rejectAllGhosts(): boolean {
   const ids = Object.keys(board().ghosts)
   return ids.length ? dispatch({ type: 'removeGhosts', payload: { ids } }) : false
+}
+
+// ─── Capture ───────────────────────────────────────────────────────────────
+
+/**
+ * Adds a captured card, plus an "opened from" link from the card it was opened from,
+ * as one undo step.
+ */
+export function addCapturedNode(node: CanvasNode, parentId: string | null): boolean {
+  const commands: Command[] = [{ type: 'addNodes', payload: { nodes: [node] } }]
+  if (parentId && board().nodes[parentId]) {
+    commands.push({
+      type: 'connect',
+      payload: {
+        edge: {
+          id: newId(),
+          source: parentId,
+          target: node.id,
+          relation: 'opened-from',
+          origin: 'provenance'
+        }
+      }
+    })
+  }
+  return dispatch(batchOf(commands))
 }
